@@ -32,7 +32,7 @@ export default function Navbar() {
                 <MDBCollapse navbar open={openNav}>
                     <MDBNavbarNav>
                         <MDBNavbarItem>
-                            <MDBNavbarLink active aria-current='page' href='/'>
+                            <MDBNavbarLink  href='/'>
                                 Home
                             </MDBNavbarLink>
                         </MDBNavbarItem>
@@ -49,6 +49,11 @@ export default function Navbar() {
                                 <MDBNavbarLink href='/login'>Login</MDBNavbarLink>
 
                             }
+                        </MDBNavbarItem>
+                        <MDBNavbarItem>
+                            <MDBNavbarLink aria-current='page' href='/signup'>
+                                Signup
+                            </MDBNavbarLink>
                         </MDBNavbarItem>
 
                         <MDBNavbarItem>

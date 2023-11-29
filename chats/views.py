@@ -1,7 +1,7 @@
 from chats.seriailizers import UserSerializer
 from chats.seriailizers import ConversationSerializer
 from chats.models import Conversation, Message
-from chats.seriailizers import MessageSerializer
+from chats.seriailizers import MessageSerializer, CreateUserSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
@@ -9,7 +9,11 @@ from django.contrib.auth.models import User
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from chats.paginators import MessagePagination
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView
+from django.contrib.auth.hashers import make_password
+
+
+
 class CustomObtainAuthTokenView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -56,3 +60,16 @@ class MessageViewSet(viewsets.ModelViewSet):
             .order_by("-timestamp")
         )
         return queryset
+    
+
+class CreateUserView(CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = CreateUserSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Override the create method to handle password hashing
+        password = request.data.get('password')
+        request.data['password'] = make_password(password)  # Assuming you are using Django's make_password function
+
+        response = super().create(request, *args, **kwargs)
+        return response

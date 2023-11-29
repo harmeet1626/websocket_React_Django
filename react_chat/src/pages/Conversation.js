@@ -187,7 +187,7 @@ export const Conversation = () => {
                           <li className="clearfix" key={user.username}>
                             <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="avatar" />
                             <div className="about">
-                              <Link to={`/${createConversationName(user.username)}`} className="name">{user.username}</Link>
+                              <Link to={`user/${createConversationName(user.username)}`} className="name">{user.username}</Link>
                               {/* <div className="status"> <i className="fa fa-circle offline"></i> offline since Oct 28 </div> */}
                             </div>
                           </li>

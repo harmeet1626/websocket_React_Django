@@ -61,3 +61,9 @@ class ConversationSerializer(serializers.ModelSerializer):
                 # This is the other participant
                 other_user = User.objects.get(username=username)
                 return UserSerializer(other_user, context=context).data
+
+
+class CreateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email', 'password']  # Add other fields as needed
