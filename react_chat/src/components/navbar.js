@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     MDBContainer,
     MDBNavbar,
@@ -11,12 +11,14 @@ import {
     MDBIcon
 } from 'mdb-react-ui-kit';
 import AuthService from '../auth/AuthService';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function Navbar() {
     const [openNav, setOpenNav] = useState(false);
     const [user, setUser] = useState(() => AuthService.getCurrentUser())
     const navigate = useNavigate()
+    const location = useLocation()
+
     return (
         <MDBNavbar expand='lg' light bgColor='light'>
             <MDBContainer fluid>
@@ -31,11 +33,15 @@ export default function Navbar() {
                 </MDBNavbarToggler>
                 <MDBCollapse navbar open={openNav}>
                     <MDBNavbarNav>
-                        <MDBNavbarItem>
-                            <MDBNavbarLink href='/'>
-                                Home
-                            </MDBNavbarLink>
-                        </MDBNavbarItem>
+                        {location.pathname == '/login' || location.pathname == '/signup' ?
+                            "" :
+                            <MDBNavbarItem className='home_button'>
+                                <MDBNavbarLink href='/'>
+                                    Home
+                                </MDBNavbarLink>
+                            </MDBNavbarItem>
+
+                        }
                         {/* <MDBNavbarItem>
                             <MDBNavbarLink href='#'>Features</MDBNavbarLink>
                         </MDBNavbarItem> */}
