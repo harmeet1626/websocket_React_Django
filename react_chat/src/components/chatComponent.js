@@ -146,10 +146,13 @@ export const ChatComponent = () => {
 
         return `${formattedHours}:${formattedMinutes}`;
     }
+    const heightStyle = {
+        height: '100vh'
+    }
 
     return (
         <>
-            <div className="chat">
+            <div className="chat" style={heightStyle}>
                 {/* <button onClick={() => test()}>Test</button> */}
                 <div className="chat-header clearfix">
                     <div className="row">

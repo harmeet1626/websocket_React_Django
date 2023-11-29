@@ -32,7 +32,7 @@ export default function Navbar() {
                 <MDBCollapse navbar open={openNav}>
                     <MDBNavbarNav>
                         <MDBNavbarItem>
-                            <MDBNavbarLink  href='/'>
+                            <MDBNavbarLink href='/'>
                                 Home
                             </MDBNavbarLink>
                         </MDBNavbarItem>

@@ -22,11 +22,11 @@ function SignUp() {
     const navigate = useNavigate()
     async function createUser() {
         const response = await axios.post(`http://127.0.0.1:8000/create-user/`,
-        {
-            username:username_input,
-            email:email_input,
-            password:password_input
-        }
+            {
+                username: username_input,
+                email: email_input,
+                password: password_input
+            }
         )
         navigate('/login')
     }
@@ -65,7 +65,7 @@ function SignUp() {
                                 <MDBCheckbox name='flexCheck' value='' id='flexCheckDefault' label='Subscribe to our newsletter' />
                             </div>
 
-                            <MDBBtn onClick={()=> createUser()} className='mb-4' size='lg'>Register</MDBBtn>
+                            <MDBBtn onClick={() => createUser()} className='mb-4' size='lg'>Register</MDBBtn>
 
                         </MDBCol>
 
