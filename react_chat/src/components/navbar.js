@@ -36,25 +36,20 @@ export default function Navbar() {
                                 Home
                             </MDBNavbarLink>
                         </MDBNavbarItem>
-                        <MDBNavbarItem>
-                            <MDBNavbarLink active aria-current='page' href='/test'>
-                                Test
-                            </MDBNavbarLink>
-                        </MDBNavbarItem>
-                        <MDBNavbarItem>
+                        {/* <MDBNavbarItem>
                             <MDBNavbarLink href='#'>Features</MDBNavbarLink>
-                        </MDBNavbarItem>
-                        {user && user?.token ? <MDBNavbarItem>
-                            <MDBNavbarLink onClick={() => {
-                                AuthService.logout()
-                                navigate('/login')
-                            }}>logout</MDBNavbarLink>
-                        </MDBNavbarItem> :
-
-                            <MDBNavbarItem>
+                        </MDBNavbarItem> */}
+                        <MDBNavbarItem>
+                            {user && user?.token ?
+                                <MDBNavbarLink onClick={() => {
+                                    AuthService.logout()
+                                    navigate('/login')
+                                }}>logout</MDBNavbarLink>
+                                :
                                 <MDBNavbarLink href='/login'>Login</MDBNavbarLink>
-                            </MDBNavbarItem>
-                        }
+
+                            }
+                        </MDBNavbarItem>
 
                         <MDBNavbarItem>
                             {/* <MDBNavbarLink disabled href='#' tabIndex={-1} aria-disabled='true'>

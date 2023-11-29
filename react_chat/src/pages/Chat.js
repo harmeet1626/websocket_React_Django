@@ -34,7 +34,6 @@ export const Chat = () => {
     // onMessage handler
     onMessage: (e) => {
       const data = JSON.parse(e.data);
-      console.log('message sent', data)
       switch (data.type) {
         case "welcome_message":
           setWelcomeMessage(data.message);
@@ -121,6 +120,8 @@ export const Chat = () => {
   }
 
   const handleSubmit = () => {
+    if (message.length === 0) return;
+    if (message.length > 512) return;
     sendJsonMessage({
       type: "chat_message",
       message
@@ -128,11 +129,8 @@ export const Chat = () => {
     setMessage("");
 
   };
-  function test() {
-    console.log(messageHistory, 33333)
-  }
-  const listMessage = messageHistory.map((message)=>
-  <h1>{message.content}</h1>
+  const listMessage = messageHistory.map((message) =>
+    <h1>{message.content}</h1>
   )
 
   return (
