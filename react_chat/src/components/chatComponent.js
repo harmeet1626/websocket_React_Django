@@ -121,6 +121,8 @@ export const ChatComponent = () => {
     }
 
     const handleSubmit = () => {
+        if (message.length === 0) return;
+        if (message.length > 512) return;
         sendJsonMessage({
             type: "chat_message",
             message
