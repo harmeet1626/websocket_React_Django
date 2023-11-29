@@ -178,7 +178,7 @@ export const Conversation = () => {
                   </div>
                   <input type="text" className="form-control" placeholder="Search..." /> */}
                                 </div>
-                                <div className='list-container'>
+                                <div className='list-container' >
                                     <ul className="list-unstyled chat-list mt-2 mb-0 " >
                                         {users &&
                                             users

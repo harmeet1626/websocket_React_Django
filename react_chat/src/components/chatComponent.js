@@ -173,7 +173,12 @@ export const ChatComponent = () => {
                         </div> */}
                     </div>
                 </div>
-                <div className="chat-history">
+                <div className="chat-history" style={{
+                    height: '70vh',
+                    width: '145vh',
+                    overflow: 'auto',
+                    border: '1px solid #C0C0C0',
+                }}>
                     <ul className="m-b-0">
                         {reverced_messageHistory.map((message) => (
                             <li className="clearfix">
