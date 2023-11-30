@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import AuthService from '../auth/AuthService';
+import Avatar from 'react-avatar';
 export const ChatComponent = () => {
 
     const [welcomeMessage, setWelcomeMessage] = useState("");
@@ -20,6 +21,21 @@ export const ChatComponent = () => {
     const [typing, setTyping] = useState(false);
 
     const { conversationName } = useParams();
+
+    function GetName() {
+        const fullName = conversationName;
+
+        // Split the string using "__" as the delimiter
+        const nameArray = fullName.split("__");
+
+        // Filter out any empty strings resulting from consecutive "__" occurrences
+        const filteredNameArray = nameArray.filter(part => part.trim() !== "");
+
+        // Log the result
+        console.log(filteredNameArray);
+        return filteredNameArray[1]
+    }
+
 
     const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://127.0.0.1:8000/chats/${conversationName}/` : null, {
         queryParams: {
@@ -119,7 +135,17 @@ export const ChatComponent = () => {
         setMessage(e.target.value);
         // onType();
     }
+    const containerRef = useRef(null)
 
+
+    useEffect(() => {
+        // Get the height of the container
+        const containerHeight = containerRef.current.scrollHeight;
+        containerRef.current.scrollTo({
+            top: containerHeight,
+            behavior: 'smooth', // You can use 'auto' for instant scrolling
+        });
+    }, [messageHistory])
     const handleSubmit = () => {
         if (message.length === 0) return;
         if (message.length > 512) return;
@@ -129,10 +155,8 @@ export const ChatComponent = () => {
         });
         setMessage("");
 
+
     };
-    function test() {
-        console.log(messageHistory, 33333)
-    }
     const listMessage = messageHistory.map((message) =>
         <h1>{message.content}</h1>
     )
@@ -160,10 +184,16 @@ export const ChatComponent = () => {
                     <div className="row">
                         <div className="col-lg-6">
                             <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
-                                <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar" />
+
+                                {/* <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar" /> */}
                             </a>
-                            <div className="chat-about">
-                                <h6 className="m-b-0">{user.username}</h6>
+                            <div className="chat-about" style={{ display: "flex" }}>
+                                <Avatar
+                                    name={GetName()}
+                                    round={true} // Optional: Makes the avatar round
+                                    size="30"   // Optional: Set the size of the avatar
+                                />&nbsp;&nbsp;
+                                <h6 className="m-b-0">{GetName()}</h6>
                                 {/* <small>Last seen: 2 hours ago</small> */}
                             </div>
                         </div>
@@ -175,7 +205,7 @@ export const ChatComponent = () => {
                         </div> */}
                     </div>
                 </div>
-                <div className="chat-history" style={{
+                <div className="chat-history" ref={containerRef} style={{
                     height: '70vh',
                     width: '145vh',
                     overflow: 'auto',

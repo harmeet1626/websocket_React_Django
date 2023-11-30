@@ -3,6 +3,7 @@ import { useParams, Link, Outlet, useNavigate } from 'react-router-dom';
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import AuthService from '../auth/AuthService';
 import '../style/chat.css'
+import Avatar from 'react-avatar';
 export const Conversation = () => {
 
     const [welcomeMessage, setWelcomeMessage] = useState("");
@@ -52,7 +53,7 @@ export const Conversation = () => {
 
 
 
-    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://127.0.0.1:8000/chats/${conversationName}/` : null, {
+    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://127.0.0.1:8000/${conversationName}/` : null, {
         queryParams: {
             token: user ? user.token : "",
         },
@@ -185,8 +186,14 @@ export const Conversation = () => {
                                                 .filter((u) => u.username !== user?.username)
                                                 .map((user) => (
                                                     <li className="clearfix" key={user.username}>
-                                                        <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="avatar" />
+                                                        {/* <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="avatar" /> */}
+
                                                         <div className="about">
+                                                            <Avatar
+                                                                name={user.username}
+                                                                round={true} // Optional: Makes the avatar round
+                                                                size="30"   // Optional: Set the size of the avatar
+                                                            />&nbsp;&nbsp;
                                                             <Link to={`user/${createConversationName(user.username)}`} className="name">{user.username}</Link>
                                                             {/* <div className="status"> <i className="fa fa-circle offline"></i> offline since Oct 28 </div> */}
                                                         </div>
