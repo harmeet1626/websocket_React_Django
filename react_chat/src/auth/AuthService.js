@@ -4,11 +4,10 @@ class AuthService {
   setUserInLocalStorage(data) {
     localStorage.setItem("user", JSON.stringify(data));
   }
-
   async login(username, password) {
 
     try{
-      const response = await axios.post("http://127.0.0.1:8000/auth-token/", { username, password });
+      const response = await axios.post("https://web-chatapplication.softprodigyphp.in/auth-token/", { username, password });
       if (!response.data.token) {
         return response.data;
       }

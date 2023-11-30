@@ -28,10 +28,10 @@ export const Conversation = () => {
 
     useEffect(() => {
         async function fetchUsers() {
-            if (!user?.username){
+            if (!user?.username) {
                 navigate('/login')
             }
-            const res = await fetch("http://127.0.0.1:8000/users/", {
+            const res = await fetch("http://web-chatapplication.softprodigyphp.in/users/", {
                 headers: {
                     Authorization: `Token ${user?.token}`
                 }
@@ -47,16 +47,7 @@ export const Conversation = () => {
         return `${namesAlph[0]}__${namesAlph[1]}`;
     }
 
-
-
-
-
-
-
-
-
-
-    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://127.0.0.1:8000/${conversationName}/` : null, {
+    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://web-chatapplication.softprodigyphp.in/${conversationName}/` : null, {
         queryParams: {
             token: user ? user.token : "",
         },
@@ -114,7 +105,7 @@ export const Conversation = () => {
 
     useEffect(() => {
         async function fetchConversation() {
-            const apiRes = await fetch(`http://127.0.0.1:8000/conversations/${conversationName}/`, {
+            const apiRes = await fetch(`http://web-chatapplication.softprodigyphp.in/conversations/${conversationName}/`, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",
@@ -187,7 +178,7 @@ export const Conversation = () => {
                                                     <li className="clearfix" key={user.username}>
                                                         {/* <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="avatar" /> */}
                                                         <Link to={`user/${createConversationName(user.username)}`}>
-                                                            <div className="about" style={{display:"flex"}} >
+                                                            <div className="about" style={{ display: "flex" }} >
                                                                 <Avatar
                                                                     name={user.username}
                                                                     round={true} // Optional: Makes the avatar round

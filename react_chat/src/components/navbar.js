@@ -18,7 +18,6 @@ export default function Navbar() {
     const [user, setUser] = useState(() => AuthService.getCurrentUser())
     const navigate = useNavigate()
     const location = useLocation()
-
     return (
         <MDBNavbar expand='lg' light bgColor='light'>
             <MDBContainer fluid>
@@ -34,39 +33,34 @@ export default function Navbar() {
                 <MDBCollapse navbar open={openNav}>
                     <MDBNavbarNav>
                         {location.pathname == '/login' || location.pathname == '/signup' ?
-                            "" :
-                            <MDBNavbarItem className='home_button'>
-                                <MDBNavbarLink href='/'>
-                                    Home
-                                </MDBNavbarLink>
-                            </MDBNavbarItem>
+                            <>
+                                <MDBNavbarItem>
+                                    <MDBNavbarLink href='/login'>Login</MDBNavbarLink>
+                                </MDBNavbarItem>
+                                <MDBNavbarItem>
+                                    <MDBNavbarLink aria-current='page' href='/signup'>
+                                        Signup
+                                    </MDBNavbarLink>
+                                </MDBNavbarItem>
+                            </>
+
+                            :
+                            <>
+                                <MDBNavbarItem className='home_button'>
+                                    <MDBNavbarLink href='/'>
+                                        Home
+                                    </MDBNavbarLink>
+                                </MDBNavbarItem>
+                                <MDBNavbarItem>
+                                    <MDBNavbarLink onClick={() => {
+                                        AuthService.logout()
+                                        navigate('/login')
+                                    }}>logout</MDBNavbarLink>
+                                </MDBNavbarItem>
+                            </>
 
                         }
-                        {/* <MDBNavbarItem>
-                            <MDBNavbarLink href='#'>Features</MDBNavbarLink>
-                        </MDBNavbarItem> */}
-                        <MDBNavbarItem>
-                            {user && user?.token ?
-                                <MDBNavbarLink onClick={() => {
-                                    AuthService.logout()
-                                    navigate('/login')
-                                }}>logout</MDBNavbarLink>
-                                :
-                                <MDBNavbarLink href='/login'>Login</MDBNavbarLink>
 
-                            }
-                        </MDBNavbarItem>
-                        <MDBNavbarItem>
-                            <MDBNavbarLink aria-current='page' href='/signup'>
-                                Signup
-                            </MDBNavbarLink>
-                        </MDBNavbarItem>
-
-                        <MDBNavbarItem>
-                            {/* <MDBNavbarLink disabled href='#' tabIndex={-1} aria-disabled='true'>
-                                Disabled
-                            </MDBNavbarLink> */}
-                        </MDBNavbarItem>
                     </MDBNavbarNav>
                 </MDBCollapse>
             </MDBContainer>

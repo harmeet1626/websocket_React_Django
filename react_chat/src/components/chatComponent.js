@@ -36,7 +36,7 @@ export const ChatComponent = () => {
     }
 
 
-    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://127.0.0.1:8000/chats/${conversationName}/` : null, {
+    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://web-chatapplication.softprodigyphp.in/chats/${conversationName}/` : null, {
         queryParams: {
             token: user ? user.token : "",
         },
@@ -94,7 +94,7 @@ export const ChatComponent = () => {
 
     useEffect(() => {
         async function fetchConversation() {
-            const apiRes = await fetch(`http://127.0.0.1:8000/conversations/${conversationName}/`, {
+            const apiRes = await fetch(`http://web-chatapplication.softprodigyphp.in/conversations/${conversationName}/`, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",
@@ -172,6 +172,11 @@ export const ChatComponent = () => {
     const heightStyle = {
         height: '100vh'
     }
+    const handleKeyPress = (e) => {
+        if (e.key === 'Enter') {
+            handleSubmit()
+        }
+    };
 
     return (
         <>
@@ -190,7 +195,7 @@ export const ChatComponent = () => {
                                     round={true} // Optional: Makes the avatar round
                                     size="30"   // Optional: Set the size of the avatar
                                 />&nbsp;&nbsp;
-                                <h6 style={{padding:"5px"}} className="m-b-0">{GetName()}</h6>
+                                <h6 style={{ padding: "5px" }} className="m-b-0">{GetName()}</h6>
                                 {/* <small>Last seen: 2 hours ago</small> */}
                             </div>
                         </div>
@@ -244,10 +249,10 @@ export const ChatComponent = () => {
                 </div>
                 <div className="chat-message clearfix">
                     <div className="input-group mb-0">
+                        <input onKeyPress={handleKeyPress} value={message} onChange={(e) => setMessage(e.target.value)} type="text" className="form-control" placeholder="Enter text here..." />
                         <div className="input-group-prepend">
                             <span className="input-group-text" onClick={() => { handleSubmit() }}><i className="fa fa-send"></i></span>
                         </div>
-                        <input value={message} onChange={(e) => setMessage(e.target.value)} type="text" className="form-control" placeholder="Enter text here..." />
                     </div>
                 </div>
             </div>
