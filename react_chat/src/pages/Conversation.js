@@ -175,9 +175,9 @@ export const Conversation = () => {
                             <div id="plist" className="people-list">
                                 <div className="input-group">
                                     {/* <div className="input-group-prepend">
-                    <span className="input-group-text"><i className="fa fa-search"></i></span>
-                  </div>
-                  <input type="text" className="form-control" placeholder="Search..." /> */}
+                                        <span className="input-group-text"><i className="fa fa-search"></i></span>
+                                        </div>
+                                        <input type="text" className="form-control" placeholder="Search..." /> */}
                                 </div>
                                 <div className='list-container' >
                                     <ul className="list-unstyled chat-list mt-2 mb-0 " >
@@ -187,16 +187,17 @@ export const Conversation = () => {
                                                 .map((user) => (
                                                     <li className="clearfix" key={user.username}>
                                                         {/* <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="avatar" /> */}
-
-                                                        <div className="about">
-                                                            <Avatar
-                                                                name={user.username}
-                                                                round={true} // Optional: Makes the avatar round
-                                                                size="30"   // Optional: Set the size of the avatar
-                                                            />&nbsp;&nbsp;
-                                                            <Link to={`user/${createConversationName(user.username)}`} className="name">{user.username}</Link>
-                                                            {/* <div className="status"> <i className="fa fa-circle offline"></i> offline since Oct 28 </div> */}
-                                                        </div>
+                                                        <Link to={`user/${createConversationName(user.username)}`}>
+                                                            <div className="about" style={{display:"flex"}} >
+                                                                <Avatar
+                                                                    name={user.username}
+                                                                    round={true} // Optional: Makes the avatar round
+                                                                    size="30"   // Optional: Set the size of the avatar
+                                                                />&nbsp;&nbsp;
+                                                                <p style={{ padding: "5px" }} className="name">{user.username}</p>
+                                                                {/* <div className="status"> <i className="fa fa-circle offline"></i> offline since Oct 28 </div> */}
+                                                            </div>
+                                                        </Link>
                                                     </li>
                                                 ))
                                         }

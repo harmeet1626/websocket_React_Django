@@ -193,7 +193,7 @@ export const ChatComponent = () => {
                                     round={true} // Optional: Makes the avatar round
                                     size="30"   // Optional: Set the size of the avatar
                                 />&nbsp;&nbsp;
-                                <h6 className="m-b-0">{GetName()}</h6>
+                                <h6 style={{padding:"5px"}} className="m-b-0">{GetName()}</h6>
                                 {/* <small>Last seen: 2 hours ago</small> */}
                             </div>
                         </div>
