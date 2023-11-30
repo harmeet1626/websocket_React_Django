@@ -32,12 +32,11 @@ export const ChatComponent = () => {
         const filteredNameArray = nameArray.filter(part => part.trim() !== "");
 
         // Log the result
-        console.log(filteredNameArray);
         return filteredNameArray[1]
     }
 
 
-    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://127.0.0.1:8000/chats/${conversationName}/` : null, {
+    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://web-chatapplication.softprodigyphp.in/chats/${conversationName}/` : null, {
         queryParams: {
             token: user ? user.token : "",
         },
@@ -50,7 +49,6 @@ export const ChatComponent = () => {
         // onMessage handler
         onMessage: (e) => {
             const data = JSON.parse(e.data);
-            console.log('message sent', data)
             switch (data.type) {
                 case "welcome_message":
                     setWelcomeMessage(data.message);
@@ -96,8 +94,7 @@ export const ChatComponent = () => {
 
     useEffect(() => {
         async function fetchConversation() {
-            console.log(user)
-            const apiRes = await fetch(`http://127.0.0.1:8000/conversations/${conversationName}/`, {
+            const apiRes = await fetch(`http://web-chatapplication.softprodigyphp.in/conversations/${conversationName}/`, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",
@@ -207,7 +204,7 @@ export const ChatComponent = () => {
                 </div>
                 <div className="chat-history" ref={containerRef} style={{
                     height: '70vh',
-                    width: '145vh',
+                    width: '1000px',
                     overflow: 'auto',
                     border: '1px solid #C0C0C0',
                 }}>

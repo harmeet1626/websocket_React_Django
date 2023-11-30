@@ -21,7 +21,7 @@ function SignUp() {
     const [password_input, setPassword_input] = useState('')
     const navigate = useNavigate()
     async function createUser() {
-        const response = await axios.post(`http://127.0.0.1:8000/create-user/`,
+        const response = await axios.post(`http://web-chatapplication.softprodigyphp.in/create-user/`,
             {
                 username: username_input,
                 email: email_input,

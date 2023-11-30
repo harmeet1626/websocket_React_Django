@@ -19,8 +19,11 @@ function Login() {
     const [userName, setUsername] = useState('')
     const [password, SetPassword] = useState('')
     async function login_user() {
-        await AuthService.login(userName, password).then(() => {
-            navigate('/')
+        await AuthService.login(userName, password).then((res) => {
+            if (res?.username) {
+
+                navigate('/')
+            }
         })
     }
     return (

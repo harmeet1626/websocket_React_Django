@@ -28,7 +28,7 @@ export const Conversation = () => {
 
     useEffect(() => {
         async function fetchUsers() {
-            const res = await fetch("http://127.0.0.1:8000/users/", {
+            const res = await fetch("http://web-chatapplication.softprodigyphp.in/users/", {
                 headers: {
                     Authorization: `Token ${user?.token}`
                 }
@@ -53,7 +53,7 @@ export const Conversation = () => {
 
 
 
-    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://127.0.0.1:8000/${conversationName}/` : null, {
+    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://web-chatapplication.softprodigyphp.in/${conversationName}/` : null, {
         queryParams: {
             token: user ? user.token : "",
         },
@@ -66,7 +66,6 @@ export const Conversation = () => {
         // onMessage handler
         onMessage: (e) => {
             const data = JSON.parse(e.data);
-            console.log('message sent', data)
             switch (data.type) {
                 case "welcome_message":
                     setWelcomeMessage(data.message);
@@ -112,7 +111,7 @@ export const Conversation = () => {
 
     useEffect(() => {
         async function fetchConversation() {
-            const apiRes = await fetch(`http://127.0.0.1:8000/conversations/${conversationName}/`, {
+            const apiRes = await fetch(`http://web-chatapplication.softprodigyphp.in/conversations/${conversationName}/`, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",
@@ -159,9 +158,6 @@ export const Conversation = () => {
         setMessage("");
 
     };
-    function test() {
-        console.log(messageHistory, 33333)
-    }
     const listMessage = messageHistory.map((message) =>
         <h1>{message.content}</h1>
     )
