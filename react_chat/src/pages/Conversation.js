@@ -28,7 +28,10 @@ export const Conversation = () => {
 
     useEffect(() => {
         async function fetchUsers() {
-            const res = await fetch("http://web-chatapplication.softprodigyphp.in/users/", {
+            if (!user?.username){
+                navigate('/login')
+            }
+            const res = await fetch("http://127.0.0.1:8000/users/", {
                 headers: {
                     Authorization: `Token ${user?.token}`
                 }
@@ -53,7 +56,7 @@ export const Conversation = () => {
 
 
 
-    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://web-chatapplication.softprodigyphp.in/${conversationName}/` : null, {
+    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://127.0.0.1:8000/${conversationName}/` : null, {
         queryParams: {
             token: user ? user.token : "",
         },
@@ -111,7 +114,7 @@ export const Conversation = () => {
 
     useEffect(() => {
         async function fetchConversation() {
-            const apiRes = await fetch(`http://web-chatapplication.softprodigyphp.in/conversations/${conversationName}/`, {
+            const apiRes = await fetch(`http://127.0.0.1:8000/conversations/${conversationName}/`, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",

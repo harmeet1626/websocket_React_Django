@@ -36,7 +36,7 @@ export const ChatComponent = () => {
     }
 
 
-    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://web-chatapplication.softprodigyphp.in/chats/${conversationName}/` : null, {
+    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://127.0.0.1:8000/chats/${conversationName}/` : null, {
         queryParams: {
             token: user ? user.token : "",
         },
@@ -94,7 +94,7 @@ export const ChatComponent = () => {
 
     useEffect(() => {
         async function fetchConversation() {
-            const apiRes = await fetch(`http://web-chatapplication.softprodigyphp.in/conversations/${conversationName}/`, {
+            const apiRes = await fetch(`http://127.0.0.1:8000/conversations/${conversationName}/`, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",
@@ -204,7 +204,7 @@ export const ChatComponent = () => {
                 </div>
                 <div className="chat-history" ref={containerRef} style={{
                     height: '70vh',
-                    width: '1000px',
+                    width: '100%',
                     overflow: 'auto',
                     border: '1px solid #C0C0C0',
                 }}>
