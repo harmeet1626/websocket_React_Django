@@ -38,7 +38,7 @@ export default function Navbar() {
                                     <MDBNavbarLink href='/login'>Login</MDBNavbarLink>
                                 </MDBNavbarItem>
                                 <MDBNavbarItem>
-                                    <MDBNavbarLink aria-current='page' href='/signup'>
+                                    <MDBNavbarLink aria-current='page'>
                                         Signup
                                     </MDBNavbarLink>
                                 </MDBNavbarItem>
@@ -57,6 +57,10 @@ export default function Navbar() {
                                         navigate('/login')
                                     }}>logout</MDBNavbarLink>
                                 </MDBNavbarItem>
+                                <MDBNavbarItem className='ml-auto home_button' style={{ marginLeft: 'auto' }}>
+                                    <MDBNavbarLink style={{ fontWeight: 'bold' }}>{user?.username}</MDBNavbarLink>
+                                </MDBNavbarItem>
+
                             </>
 
                         }

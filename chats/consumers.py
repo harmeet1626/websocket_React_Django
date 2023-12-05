@@ -17,11 +17,6 @@ class UUIDEncoder(json.JSONEncoder):
 
 
 class ChatConsumer(JsonWebsocketConsumer):
-    """
-    This consumer is used to show user's online status,
-    and send notifications.
-    """
-
     def __init__(self, *args, **kwargs):
         super().__init__(args, kwargs)
         self.room_name = None

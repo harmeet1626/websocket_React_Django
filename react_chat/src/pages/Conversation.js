@@ -25,13 +25,14 @@ export const Conversation = () => {
     const navigate = useNavigate()
 
     const [users, setUsers] = useState([]);
+    const apiUrl = process.env.REACT_APP_API_BASE_URL;
 
     useEffect(() => {
         async function fetchUsers() {
             if (!user?.username) {
                 navigate('/login')
             }
-            const res = await fetch("http://web-chatapplication.softprodigyphp.in/users/", {
+            const res = await fetch(`http://${apiUrl}users/`, {
                 headers: {
                     Authorization: `Token ${user?.token}`
                 }
@@ -47,7 +48,7 @@ export const Conversation = () => {
         return `${namesAlph[0]}__${namesAlph[1]}`;
     }
 
-    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://web-chatapplication.softprodigyphp.in/${conversationName}/` : null, {
+    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://${apiUrl}${conversationName}/` : null, {
         queryParams: {
             token: user ? user.token : "",
         },
@@ -105,7 +106,7 @@ export const Conversation = () => {
 
     useEffect(() => {
         async function fetchConversation() {
-            const apiRes = await fetch(`http://web-chatapplication.softprodigyphp.in/conversations/${conversationName}/`, {
+            const apiRes = await fetch(`http://${apiUrl}conversations/${conversationName}/`, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",
@@ -124,34 +125,34 @@ export const Conversation = () => {
 
 
 
-    const connectionStatus = {
-        [ReadyState.CONNECTING]: "Connecting",
-        [ReadyState.OPEN]: "Open",
-        [ReadyState.CLOSING]: "Closing",
-        [ReadyState.CLOSED]: "Closed",
-        [ReadyState.UNINSTANTIATED]: "Uninstantiated"
-    }[readyState];
-    useEffect(() => {
-        if (connectionStatus === "Open") {
-            sendJsonMessage({
-                type: "read_messages"
-            });
-        }
-    }, [connectionStatus, sendJsonMessage]);
+    // const connectionStatus = {
+    //     [ReadyState.CONNECTING]: "Connecting",
+    //     [ReadyState.OPEN]: "Open",
+    //     [ReadyState.CLOSING]: "Closing",
+    //     [ReadyState.CLOSED]: "Closed",
+    //     [ReadyState.UNINSTANTIATED]: "Uninstantiated"
+    // }[readyState];
+    // useEffect(() => {
+    //     if (connectionStatus === "Open") {
+    //         sendJsonMessage({
+    //             type: "read_messages"
+    //         });
+    //     }
+    // }, [connectionStatus, sendJsonMessage]);
 
     function handleChangeMessage(e) {
         setMessage(e.target.value);
         // onType();
     }
 
-    const handleSubmit = () => {
-        sendJsonMessage({
-            type: "chat_message",
-            message
-        });
-        setMessage("");
+    // const handleSubmit = () => {
+    //     sendJsonMessage({
+    //         type: "chat_message",
+    //         message
+    //     });
+    //     setMessage("");
 
-    };
+    // };
     const listMessage = messageHistory.map((message) =>
         <h1>{message.content}</h1>
     )
@@ -170,6 +171,7 @@ export const Conversation = () => {
                                         <input type="text" className="form-control" placeholder="Search..." /> */}
                                 </div>
                                 <div className='list-container' >
+
                                     <ul className="list-unstyled chat-list mt-2 mb-0 " >
                                         {users &&
                                             users

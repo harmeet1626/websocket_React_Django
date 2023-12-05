@@ -5,9 +5,10 @@ class AuthService {
     localStorage.setItem("user", JSON.stringify(data));
   }
   async login(username, password) {
+    const apiUrl = process.env.REACT_APP_API_BASE_URL;
 
-    try{
-      const response = await axios.post("https://web-chatapplication.softprodigyphp.in/auth-token/", { username, password });
+    try {
+      const response = await axios.post(`http://${apiUrl}auth-token/`, { username, password });
       if (!response.data.token) {
         return response.data;
       }
@@ -15,7 +16,7 @@ class AuthService {
       this.getCurrentUser()
       return response.data;
     }
-    catch(e){
+    catch (e) {
       console.log(e)
     }
   }
@@ -25,6 +26,7 @@ class AuthService {
   }
 
   getCurrentUser() {
+    console.log('test, getcurrentuser')
     const user = localStorage.getItem("user");
     return JSON.parse(user);
   }

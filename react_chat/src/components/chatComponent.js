@@ -32,11 +32,19 @@ export const ChatComponent = () => {
         const filteredNameArray = nameArray.filter(part => part.trim() !== "");
 
         // Log the result
-        return filteredNameArray[1]
+        console.log(filteredNameArray, 'test')
+        if(filteredNameArray[1] == user?.username){
+            return filteredNameArray[0]
+            
+        }else{
+            return filteredNameArray[1]
+        }
     }
 
+    const apiUrl = process.env.REACT_APP_API_BASE_URL;
 
-    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://web-chatapplication.softprodigyphp.in/chats/${conversationName}/` : null, {
+
+    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://${apiUrl}chats/${conversationName}/` : null, {
         queryParams: {
             token: user ? user.token : "",
         },
@@ -94,7 +102,7 @@ export const ChatComponent = () => {
 
     useEffect(() => {
         async function fetchConversation() {
-            const apiRes = await fetch(`http://web-chatapplication.softprodigyphp.in/conversations/${conversationName}/`, {
+            const apiRes = await fetch(`http://${apiUrl}conversations/${conversationName}/`, {
                 method: "GET",
                 headers: {
                     Accept: "application/json",

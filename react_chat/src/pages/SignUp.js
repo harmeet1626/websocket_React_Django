@@ -20,8 +20,9 @@ function SignUp() {
     const [email_input, setEmail_input] = useState('')
     const [password_input, setPassword_input] = useState('')
     const navigate = useNavigate()
+    const apiUrl = process.env.REACT_APP_API_BASE_URL;
     async function createUser() {
-        const response = await axios.post(`http://web-chatapplication.softprodigyphp.in/create-user/`,
+        const response = await axios.post(`http://${apiUrl}create-user/`,
             {
                 username: username_input,
                 email: email_input,
@@ -61,9 +62,6 @@ function SignUp() {
                                 <MDBInput label='Repeat your password' id='form4' type='password' />
                             </div> */}
 
-                            <div className='mb-4'>
-                                <MDBCheckbox name='flexCheck' value='' id='flexCheckDefault' label='Subscribe to our newsletter' />
-                            </div>
 
                             <MDBBtn onClick={() => createUser()} className='mb-4' size='lg'>Register</MDBBtn>
 

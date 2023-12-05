@@ -21,7 +21,6 @@ function Login() {
     async function login_user() {
         await AuthService.login(userName, password).then((res) => {
             if (res?.username) {
-
                 navigate('/')
             }
         })
