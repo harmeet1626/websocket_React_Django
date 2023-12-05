@@ -38,7 +38,7 @@ export default function Navbar() {
                                     <MDBNavbarLink href='/login'>Login</MDBNavbarLink>
                                 </MDBNavbarItem>
                                 <MDBNavbarItem>
-                                    <MDBNavbarLink aria-current='page'>
+                                    <MDBNavbarLink href='/signup' aria-current='page'>
                                         Signup
                                     </MDBNavbarLink>
                                 </MDBNavbarItem>
