@@ -19,9 +19,9 @@ export default function Navbar() {
     const navigate = useNavigate()
     const location = useLocation()
     return (
-        <MDBNavbar expand='lg' light bgColor='light'>
+        <MDBNavbar expand='lg' style={{ backgroundColor: "#00a884" }}>
             <MDBContainer fluid>
-                <MDBNavbarBrand href='#'>Navbar</MDBNavbarBrand>
+                <MDBNavbarBrand href='#'><img style={{height:'5vh'}} src='https://icons.veryicon.com/png/o/miscellaneous/basic-icon/message-54.png' />Chat Application</MDBNavbarBrand>
                 <MDBNavbarToggler
                     type='button'
                     aria-expanded='false'

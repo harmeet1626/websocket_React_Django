@@ -158,50 +158,41 @@ export const Conversation = () => {
     )
 
     return (
-        <div>
-            <div className="container">
-                <div className="row clearfix">
-                    <div className="col-lg-12">
-                        <div className="card chat-app">
-                            <div id="plist" className="people-list">
-                                <div className="input-group">
-                                    {/* <div className="input-group-prepend">
-                                        <span className="input-group-text"><i className="fa fa-search"></i></span>
-                                        </div>
-                                        <input type="text" className="form-control" placeholder="Search..." /> */}
-                                </div>
-                                <div className='list-container' >
 
-                                    <ul className="list-unstyled chat-list mt-2 mb-0 " >
-                                        {users &&
-                                            users
-                                                .filter((u) => u.username !== user?.username)
-                                                .map((user) => (
-                                                    <li className="clearfix" key={user.username}>
-                                                        {/* <img src="https://bootdey.com/img/Content/avatar/avatar3.png" alt="avatar" /> */}
-                                                        <Link to={`user/${createConversationName(user.username)}`}>
-                                                            <div className="about" style={{ display: "flex" }} >
-                                                                <Avatar
-                                                                    name={user.username}
-                                                                    round={true} // Optional: Makes the avatar round
-                                                                    size="30"   // Optional: Set the size of the avatar
-                                                                />&nbsp;&nbsp;
-                                                                <p style={{ padding: "5px" }} className="name">{user.username}</p>
-                                                                {/* <div className="status"> <i className="fa fa-circle offline"></i> offline since Oct 28 </div> */}
-                                                            </div>
-                                                        </Link>
-                                                    </li>
-                                                ))
-                                        }
-                                    </ul>
-                                </div>
-                            </div>
-                            <Outlet />
+        <div className="row clearfix" >
+            <div className="col-lg-12">
+                <div className="card chat-app" style={{ backgroundColor: "whitesmoke" }}>
+                    <div id="plist" className="people-list" >
+                        <div className="input-group">
                         </div>
+                            <ul className="list-unstyled chat-list mt-2 mb-0" >
+                                {users &&
+                                    users
+                                        .filter((u) => u.username !== user?.username)
+                                        .map((user, index) => (
+                                            <div>
+                                                <li className="clearfix" key={user.username} style={{ borderBottom: "1px solid #ddd" }}>
+                                                    <Link to={`user/${createConversationName(user.username)}`}>
+                                                        <div className="about" style={{ display: "flex" }}>
+                                                            <Avatar
+                                                                name={user.username}
+                                                                round={true} // Optional: Makes the avatar round
+                                                                size="30"   // Optional: Set the size of the avatar
+                                                            />&nbsp;&nbsp;
+                                                            <p style={{ padding: "5px" }} className="name">{user.username}</p>
+                                                        </div>
+                                                    </Link>
+                                                </li>
+                                            </div>
+                                        ))}
+                            </ul>
+
                     </div>
+                    <Outlet />
                 </div>
             </div>
         </div>
+
     );
 };
 

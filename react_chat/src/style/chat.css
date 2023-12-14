@@ -145,7 +145,10 @@ body{
 }
 
 .chat .chat-history .my-message {
-    background: #efefef
+    background-color: rgb(188, 237, 180)
+}
+.my-message{
+ background-color: rgb(245, 245, 245) !important;
 }
 
 .chat .chat-history .my-message:after {
@@ -157,7 +160,7 @@ body{
     width: 0;
     position: absolute;
     pointer-events: none;
-    border-bottom-color: #efefef;
+    border-bottom-color: rgb(245, 245, 245);
     border-width: 10px;
     margin-left: -10px
 }
@@ -168,7 +171,7 @@ body{
 }
 
 .chat .chat-history .other-message:after {
-    border-bottom-color: #e8f1f3;
+    border-bottom-color: rgb(188, 237, 180);
     left: 93%
 }
 

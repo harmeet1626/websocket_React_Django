@@ -3,6 +3,9 @@ import { useParams } from 'react-router-dom';
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import AuthService from '../auth/AuthService';
 import Avatar from 'react-avatar';
+import 'emoji-picker-element';
+import InputEmoji from 'react-input-emoji'
+
 export const ChatComponent = () => {
 
     const [welcomeMessage, setWelcomeMessage] = useState("");
@@ -33,10 +36,10 @@ export const ChatComponent = () => {
 
         // Log the result
         console.log(filteredNameArray, 'test')
-        if(filteredNameArray[1] == user?.username){
+        if (filteredNameArray[1] == user?.username) {
             return filteredNameArray[0]
-            
-        }else{
+
+        } else {
             return filteredNameArray[1]
         }
     }
@@ -145,6 +148,7 @@ export const ChatComponent = () => {
 
     useEffect(() => {
         // Get the height of the container
+        console.log(messageHistory)
         const containerHeight = containerRef.current.scrollHeight;
         containerRef.current.scrollTo({
             top: containerHeight,
@@ -165,37 +169,31 @@ export const ChatComponent = () => {
     const listMessage = messageHistory.map((message) =>
         <h1>{message.content}</h1>
     )
-    function convertTimestampToHHMM(timestamp) {
+
+    const handleKeyPress = (e) => {
+        handleSubmit()
+    };
+    function formatTime(timestamp) {
         const date = new Date(timestamp);
 
-        const hours = date.getUTCHours();
-        const minutes = date.getUTCMinutes();
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
 
-        // Format the hours and minutes with leading zeros if needed
-        const formattedHours = hours < 10 ? '0' + hours : hours;
-        const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+        const formattedTime = `${hours}:${minutes}`;
 
-        return `${formattedHours}:${formattedMinutes}`;
+        return formattedTime
+
     }
-    const heightStyle = {
-        height: '100vh'
+    function handleOnEnter(message) {
+        console.log('enter', message)
     }
-    const handleKeyPress = (e) => {
-        if (e.key === 'Enter') {
-            handleSubmit()
-        }
-    };
-
     return (
         <>
-            <div className="chat" style={heightStyle}>
-                {/* <button onClick={() => test()}>Test</button> */}
-                <div className="chat-header clearfix">
+            <div className="chat" >
+                <div className="chat-header clearfix" style={{ backgroundColor: "whitesmoke" }}>
                     <div className="row">
                         <div className="col-lg-6">
                             <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
-
-                                {/* <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar" /> */}
                             </a>
                             <div className="chat-about" style={{ display: "flex" }}>
                                 <Avatar
@@ -204,15 +202,8 @@ export const ChatComponent = () => {
                                     size="30"   // Optional: Set the size of the avatar
                                 />&nbsp;&nbsp;
                                 <h6 style={{ padding: "5px" }} className="m-b-0">{GetName()}</h6>
-                                {/* <small>Last seen: 2 hours ago</small> */}
                             </div>
                         </div>
-                        {/* <div className="col-lg-6 hidden-sm text-right">
-                            <a href="javascript:void(0);" className="btn btn-outline-secondary"><i className="fa fa-camera"></i></a>
-                            <a href="javascript:void(0);" className="btn btn-outline-primary"><i className="fa fa-image"></i></a>
-                            <a href="javascript:void(0);" className="btn btn-outline-info"><i className="fa fa-cogs"></i></a>
-                            <a href="javascript:void(0);" className="btn btn-outline-warning"><i className="fa fa-question"></i></a>
-                        </div> */}
                     </div>
                 </div>
                 <div className="chat-history" ref={containerRef} style={{
@@ -220,46 +211,48 @@ export const ChatComponent = () => {
                     width: '100%',
                     overflow: 'auto',
                     border: '1px solid #C0C0C0',
+                    backgroundColor: '#e3e3e3',
+                    // overflow:"hidden"
                 }}>
                     <ul className="m-b-0">
                         {reverced_messageHistory.map((message) => (
                             <li className="clearfix">
-                                <div className={message.from_user.username == user.username ? "message-data text-right" : "message-data"}>
-                                    {/* <span className="message-data-time">{convertTimestampToHHMM(message.timestamp)}</span> */}
-                                    {/* <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar" /> */}
-                                </div>
-                                <div className={message.from_user.username == user.username ? "message other-message float-right" : "message my-message"}   > {message.content}<br></br>
-
+                                <div>
+                                    <div style={{ padding: "5px 20px", backgroundColor: message.from_user.username === user.username ? "#bcedb4" : "#f3f3f3;" }} className={message.from_user.username === user.username ? "message other-message float-right" : "message my-message"}>
+                                        {message.content}
+                                        <br />
+                                        <span style={{ fontSize: "10px", alignSelf: "flex-end", width: '170px', textAlign: "end" }} className={message.from_user.username === user.username ? "message-data-time float-right" : "message-data-time float-right"}>
+                                            {formatTime(message.timestamp)}
+                                            <span style={{ marginLeft: '5px', color: 'green', float: 'right', display: message.read == true && message.from_user.username === user.username ? 'block' : 'none' }}>✓✓</span>
+                                        </span>
+                                    </div>
                                 </div>
                             </li>
                         ))}
-
-                        {/* <li className="clearfix">
-                            <div className="message-data text-right">
-                                <span className="message-data-time">10:10 AM, Today</span>
-                                <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar" />
-                            </div>
-                            <div className="message other-message float-right"> Hi Aiden, how are you? How is the project coming along? </div>
-                        </li>
-                        <li className="clearfix">
-                            <div className="message-data">
-                                <span className="message-data-time">10:12 AM, Today</span>
-                            </div>
-                            <div className="message my-message">Are we meeting today?</div>
-                        </li>
-                        <li className="clearfix">
-                            <div className="message-data">
-                                <span className="message-data-time">10:15 AM, Today</span>
-                            </div>
-                            <div className="message my-message">Project has been already finished and I have results to show you.</div>
-                        </li> */}
                     </ul>
                 </div>
-                <div className="chat-message clearfix">
+                <div className="chat-message clearfix" style={{ backgroundColor: '#e5e5e5' }}>
                     <div className="input-group mb-0">
-                        <input onKeyPress={handleKeyPress} value={message} onChange={(e) => setMessage(e.target.value)} type="text" className="form-control" placeholder="Enter text here..." />
-                        <div className="input-group-prepend">
-                            <span className="input-group-text" onClick={() => { handleSubmit() }}><i className="fa fa-send"></i></span>
+                        {/* <ReactQuill
+                            style={{ width: '100%' }}
+                            theme="snow"
+                            defaultValue={message}
+                            onChange={handleQuillChange}
+                            onKeyPress={ha
+                                ndleKeyPress}
+                        /> */}
+                        <InputEmoji
+                            cleanOnEnter
+                            onChange={setMessage}
+                            onEnter={handleKeyPress} value={message} type="text" className="form-control" placeholder="Enter text here..."
+                        />
+                        {/* <input onKeyPress={handleKeyPress} value={message} onChange={(e) => setMessage(e.target.value)} type="text" className="form-control" placeholder="Enter text here..." /> */}
+                        {/* <emoji-picker></emoji-picker> */}
+
+                        <div className="input-group-prepend" >
+                            <span className="input-group-text" style={{ backgroundColor: "rgb(88 143 80)", marginTop:'6px' }} onClick={() => { handleSubmit() }}>
+                                <i className="fa fa-send"></i>
+                            </span>
                         </div>
                     </div>
                 </div>
