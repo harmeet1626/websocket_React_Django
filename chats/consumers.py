@@ -3,9 +3,14 @@ from channels.generic.websocket import JsonWebsocketConsumer
 from chats.models import Conversation, Message
 from django.contrib.auth.models import User
 from chats.seriailizers import MessageSerializer
-
+from channels.db import database_sync_to_async
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+from django.conf import settings
 import json
+import uuid
 from uuid import UUID
+
 
 
 class UUIDEncoder(json.JSONEncoder):
@@ -87,7 +92,7 @@ class ChatConsumer(JsonWebsocketConsumer):
         for username in usernames:
             if username != self.user.username:
                 # This is the receiver
-                return User.objects.get(username=username)
+                return User.objects.get(username=username) 
 
     def receive_json(self, content, **kwargs):
         message_type = content["type"]
@@ -116,7 +121,26 @@ class ChatConsumer(JsonWebsocketConsumer):
                     "name": self.user.username,
                     "message": MessageSerializer(message).data,
                 },
+            )        
+       
+        if message_type == "file":
+            file_content = content.get('file_content', '')
+            file_name = content.get('file_name', 'Doc')
+            print(file_name, 'file type content recived on the backend ......')
+            # Save the file and get the file URL or identifier
+
+            file_url_or_identifier = handle_file_upload(file_content, 'file_name')
+
+            # Broadcast the file information to connected clients
+            async_to_sync(self.channel_layer.group_send)(
+                self.conversation_name,
+                {
+                    "type": "file_uploaded",
+                    "file_url_or_identifier": file_url_or_identifier,
+                },
             )
+
+            return super().receive_json(content, **kwargs)
 
         if message_type == "typing":
             async_to_sync(self.channel_layer.group_send)(
@@ -129,6 +153,7 @@ class ChatConsumer(JsonWebsocketConsumer):
             )
 
         if message_type == "read_messages":
+            print('message readed')
             messages_to_me = self.conversation.messages.filter(
                 to_user=self.user)
             messages_to_me.update(read=True)
@@ -145,6 +170,12 @@ class ChatConsumer(JsonWebsocketConsumer):
             )
 
         return super().receive_json(content, **kwargs)
+    
+    def receive_binary(self, byte_data):
+        print(byte_data, "testing333333333333333")
+    
+   
+
 
     def typing(self, event):
         self.send_json(event)
@@ -163,7 +194,19 @@ class ChatConsumer(JsonWebsocketConsumer):
         return json.dumps(content, cls=UUIDEncoder)
 
 
+# @database_sync_to_async
+def handle_file_upload(self, file_content, file_name):
+    # Create a unique filename
+    print(file_name, "filename>>>>>>>>>>>")
+    unique_filename = f'{uuid.uuid4()}_{file_name}'
 
+    # Save the file to the media directory
+    file_path = default_storage.save(f'uploads/{unique_filename}', ContentFile(file_content))
+
+    # Construct the full file URL
+    file_url = f'{settings.MEDIA_URL}{file_path}'
+
+    return file_url
 
 class NotificationConsumer(JsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):

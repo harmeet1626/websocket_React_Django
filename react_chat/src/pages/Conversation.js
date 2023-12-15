@@ -1,32 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, Outlet, useNavigate } from 'react-router-dom';
-import useWebSocket, { ReadyState } from "react-use-websocket";
+import { useParams, Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import AuthService from '../auth/AuthService';
 import '../style/chat.css'
 import Avatar from 'react-avatar';
+
 export const Conversation = () => {
-
-    const [welcomeMessage, setWelcomeMessage] = useState("");
-    const [messageHistory, setMessageHistory] = useState([]);
-    const [message, setMessage] = useState("");
     const [user, setUser] = useState(() => AuthService.getCurrentUser())
-
-    const [page, setPage] = useState(2);
-    const [hasMoreMessages, setHasMoreMessages] = useState(false);
-
-    const [participants, setParticipants] = useState([]);
-
-    const [conversation, setConversation] = useState(null);
-
-    const [typing, setTyping] = useState(false);
-
-    // const { conversationName } = useParams();
-    const conversationName = 'admin__harmeet'
     const navigate = useNavigate()
-
     const [users, setUsers] = useState([]);
     const apiUrl = process.env.REACT_APP_API_BASE_URL;
-
+    const location = useLocation()
     useEffect(() => {
         async function fetchUsers() {
             if (!user?.username) {
@@ -43,135 +26,56 @@ export const Conversation = () => {
         fetchUsers();
     }, [user]);
 
+    const [homepage, setHomepage] = useState()
+    useEffect(() => {
+        if (location.pathname == '/') {
+            setHomepage(true)
+        }
+        else {
+            setHomepage(false)
+        }
+    }, [location])
+
     function createConversationName(username) {
         const namesAlph = [user?.username, username].sort();
         return `${namesAlph[0]}__${namesAlph[1]}`;
     }
+    const inputStyle = {
+        padding: '10px',
+        fontSize: '16px',
+        border: '2px solid #ccc',
+        borderRadius: '5px',
+        outline: 'none',
+        width: '100%',
+        height: "40px"
+    };
 
-    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://${apiUrl}${conversationName}/` : null, {
-        queryParams: {
-            token: user ? user.token : "",
-        },
-        onOpen: () => {
-            console.log("Connected!");
-        },
-        onClose: () => {
-            console.log("Disconnected!");
-        },
-        // onMessage handler
-        onMessage: (e) => {
-            const data = JSON.parse(e.data);
-            switch (data.type) {
-                case "welcome_message":
-                    setWelcomeMessage(data.message);
-                    break;
-                case "chat_message_echo":
-                    setMessageHistory((prev) => [data.message, ...prev]);
-                    sendJsonMessage({ type: "read_messages" });
-                    break;
-                case "last_50_messages":
-                    setMessageHistory(data.messages);
-                    setHasMoreMessages(data.has_more);
-                    break;
-                case "user_join":
-                    setParticipants((pcpts) => {
-                        if (!pcpts.includes(data.user)) {
-                            return [...pcpts, data.user];
-                        }
-                        return pcpts;
-                    });
-                    break;
-                case "user_leave":
-                    setParticipants((pcpts) => {
-                        const newPcpts = pcpts.filter((x) => x !== data.user);
-                        return newPcpts;
-                    });
-                    break;
-                case "online_user_list":
-                    setParticipants(data.users);
-                    break;
-
-                case 'typing':
-                    // updateTyping(data);
-                    break;
-
-                default:
-                    console.error("Unknown message type!");
-                    break;
-            }
-        }
-    });
-
-
-
-    useEffect(() => {
-        async function fetchConversation() {
-            const apiRes = await fetch(`http://${apiUrl}conversations/${conversationName}/`, {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: `Token ${user?.token}`
-                }
-            });
-            if (apiRes.status === 200) {
-                const data = await apiRes.json();
-                setConversation(data);
-            }
-        }
-        fetchConversation();
-    }, [conversationName, user]);
-
-
-
-
-    // const connectionStatus = {
-    //     [ReadyState.CONNECTING]: "Connecting",
-    //     [ReadyState.OPEN]: "Open",
-    //     [ReadyState.CLOSING]: "Closing",
-    //     [ReadyState.CLOSED]: "Closed",
-    //     [ReadyState.UNINSTANTIATED]: "Uninstantiated"
-    // }[readyState];
-    // useEffect(() => {
-    //     if (connectionStatus === "Open") {
-    //         sendJsonMessage({
-    //             type: "read_messages"
-    //         });
-    //     }
-    // }, [connectionStatus, sendJsonMessage]);
-
-    function handleChangeMessage(e) {
-        setMessage(e.target.value);
-        // onType();
-    }
-
-    // const handleSubmit = () => {
-    //     sendJsonMessage({
-    //         type: "chat_message",
-    //         message
-    //     });
-    //     setMessage("");
-
-    // };
-    const listMessage = messageHistory.map((message) =>
-        <h1>{message.content}</h1>
-    )
+    const [searchTerm, setSearchTerm] = useState('');
+    const filteredData = users.filter((item) =>
+        item.username.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    const handleSearch = (e) => {
+        setSearchTerm(e.target.value);
+    };
 
     return (
 
         <div className="row clearfix" >
             <div className="col-lg-12">
-                <div className="card chat-app" style={{ backgroundColor: "whitesmoke" }}>
-                    <div id="plist" className="people-list" >
-                        <div className="input-group">
-                        </div>
+                <div className="card chat-app" style={{ backgroundColor: "whitesmoke", display: "flex" }}>
+                    <div id="plist" className="people-list"  >
+                        <div>
+                            <div className="input-group">
+                                <input style={inputStyle} placeholder='search user' value={searchTerm}
+                                    onChange={handleSearch} /><br></br>
+                            </div>
                             <ul className="list-unstyled chat-list mt-2 mb-0" >
                                 {users &&
-                                    users
+                                    filteredData
                                         .filter((u) => u.username !== user?.username)
                                         .map((user, index) => (
-                                            <div>
-                                                <li className="clearfix" key={user.username} style={{ borderBottom: "1px solid #ddd" }}>
+                                            <div key={index}>
+                                                <li className="clearfix" style={{ borderBottom: "1px solid #ddd" }}>
                                                     <Link to={`user/${createConversationName(user.username)}`}>
                                                         <div className="about" style={{ display: "flex" }}>
                                                             <Avatar
@@ -186,9 +90,17 @@ export const Conversation = () => {
                                             </div>
                                         ))}
                             </ul>
+                        </div>
 
                     </div>
-                    <Outlet />
+                    <div>
+                        {homepage ?
+                            <div style={{ marginLeft: '20%', }}>
+                                <img style={{ height: '100%', width: '100%' }} src='https://plus.unsplash.com/premium_photo-1661521092142-b03326bcc8bc?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' />
+                            </div> :
+                            <Outlet />
+                        }
+                    </div>
                 </div>
             </div>
         </div>

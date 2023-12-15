@@ -26,6 +26,7 @@ class MessageSerializer(serializers.ModelSerializer):
             "content",
             "timestamp",
             "read",
+            "file"
         )
 
     def get_conversation(self, obj):

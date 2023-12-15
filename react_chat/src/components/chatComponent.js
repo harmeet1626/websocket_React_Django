@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import AuthService from '../auth/AuthService';
 import Avatar from 'react-avatar';
-import 'emoji-picker-element';
 import InputEmoji from 'react-input-emoji'
 
 export const ChatComponent = () => {
@@ -24,18 +23,12 @@ export const ChatComponent = () => {
     const [typing, setTyping] = useState(false);
 
     const { conversationName } = useParams();
+    const [loading, setLoading] = useState(true)
 
     function GetName() {
         const fullName = conversationName;
-
-        // Split the string using "__" as the delimiter
         const nameArray = fullName.split("__");
-
-        // Filter out any empty strings resulting from consecutive "__" occurrences
         const filteredNameArray = nameArray.filter(part => part.trim() !== "");
-
-        // Log the result
-        console.log(filteredNameArray, 'test')
         if (filteredNameArray[1] == user?.username) {
             return filteredNameArray[0]
 
@@ -43,6 +36,10 @@ export const ChatComponent = () => {
             return filteredNameArray[1]
         }
     }
+    useEffect(() => {
+
+        console.log(reverced_messageHistory, "message history")
+    }, [reverced_messageHistory])
 
     const apiUrl = process.env.REACT_APP_API_BASE_URL;
 
@@ -63,6 +60,10 @@ export const ChatComponent = () => {
             switch (data.type) {
                 case "welcome_message":
                     setWelcomeMessage(data.message);
+                    break;
+                case 'file':
+                    console.log("file event triggered onMessage")
+                    const fileUrlOrIdentifier = data.file_url_or_identifier;
                     break;
                 case "chat_message_echo":
                     setMessageHistory((prev) => [data.message, ...prev]);
@@ -100,9 +101,6 @@ export const ChatComponent = () => {
             }
         }
     });
-
-
-
     useEffect(() => {
         async function fetchConversation() {
             const apiRes = await fetch(`http://${apiUrl}conversations/${conversationName}/`, {
@@ -121,9 +119,6 @@ export const ChatComponent = () => {
         fetchConversation();
     }, [conversationName, user]);
 
-
-
-
     const connectionStatus = {
         [ReadyState.CONNECTING]: "Connecting",
         [ReadyState.OPEN]: "Open",
@@ -138,23 +133,24 @@ export const ChatComponent = () => {
             });
         }
     }, [connectionStatus, sendJsonMessage]);
-
-    function handleChangeMessage(e) {
-        setMessage(e.target.value);
-        // onType();
-    }
-    const containerRef = useRef(null)
-
+    const containerRef = useRef(null);
 
     useEffect(() => {
-        // Get the height of the container
-        console.log(messageHistory)
+        scrollToBottom();
+    }, []); 
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messageHistory]);
+
+    const scrollToBottom = async () => {
         const containerHeight = containerRef.current.scrollHeight;
-        containerRef.current.scrollTo({
+        await containerRef.current.scrollTo({
             top: containerHeight,
-            behavior: 'smooth', // You can use 'auto' for instant scrolling
-        });
-    }, [messageHistory])
+            behavior: 'smooth', 
+        })
+    };
+
     const handleSubmit = () => {
         if (message.length === 0) return;
         if (message.length > 512) return;
@@ -163,34 +159,37 @@ export const ChatComponent = () => {
             message
         });
         setMessage("");
-
-
     };
-    const listMessage = messageHistory.map((message) =>
-        <h1>{message.content}</h1>
-    )
-
     const handleKeyPress = (e) => {
         handleSubmit()
     };
     function formatTime(timestamp) {
         const date = new Date(timestamp);
-
         const hours = date.getHours().toString().padStart(2, '0');
         const minutes = date.getMinutes().toString().padStart(2, '0');
-
         const formattedTime = `${hours}:${minutes}`;
-
         return formattedTime
-
     }
-    function handleOnEnter(message) {
-        console.log('enter', message)
-    }
+    const fileInputRef = useRef(null);
+    const handleFileChange = (e) => {
+        const selectedFile = e.target.files[0];
+        if (selectedFile) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const fileContent = event.target.result;
+                sendJsonMessage({
+                    type: 'file',
+                    file_content: fileContent,
+                    file_name: 'Document'
+                })
+            };
+            reader.readAsArrayBuffer(selectedFile);
+        }
+    };
     return (
         <>
             <div className="chat" >
-                <div className="chat-header clearfix" style={{ backgroundColor: "whitesmoke" }}>
+                <div className="chat-header clearfix" style={{ backgroundColor: "whitesmoke", height: '65px' }}>
                     <div className="row">
                         <div className="col-lg-6">
                             <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
@@ -201,7 +200,7 @@ export const ChatComponent = () => {
                                     round={true} // Optional: Makes the avatar round
                                     size="30"   // Optional: Set the size of the avatar
                                 />&nbsp;&nbsp;
-                                <h6 style={{ padding: "5px" }} className="m-b-0">{GetName()}</h6>
+                                <h6 style={{ padding: "5px", textTransform: 'uppercase' }} className="m-b-0">{GetName()}</h6>
                             </div>
                         </div>
                     </div>
@@ -212,18 +211,18 @@ export const ChatComponent = () => {
                     overflow: 'auto',
                     border: '1px solid #C0C0C0',
                     backgroundColor: '#e3e3e3',
-                    // overflow:"hidden"
                 }}>
                     <ul className="m-b-0">
-                        {reverced_messageHistory.map((message) => (
-                            <li className="clearfix">
+                        {reverced_messageHistory.map((message, index) => (
+                            <li className="clearfix" key={index}>
                                 <div>
-                                    <div style={{ padding: "5px 20px", backgroundColor: message.from_user.username === user.username ? "#bcedb4" : "#f3f3f3;" }} className={message.from_user.username === user.username ? "message other-message float-right" : "message my-message"}>
+                                    <div style={{ padding: "5px 20px", backgroundColor: message.from_user.username === user.username ? "rgb(133 196 235)" : "#f3f3f3" }} className={message.from_user.username === user.username ? "message other-message float-right" : "message my-message"}>
                                         {message.content}
                                         <br />
                                         <span style={{ fontSize: "10px", alignSelf: "flex-end", width: '170px', textAlign: "end" }} className={message.from_user.username === user.username ? "message-data-time float-right" : "message-data-time float-right"}>
                                             {formatTime(message.timestamp)}
-                                            <span style={{ marginLeft: '5px', color: 'green', float: 'right', display: message.read == true && message.from_user.username === user.username ? 'block' : 'none' }}>✓✓</span>
+                                            {/* <span style={{ marginLeft: '5px' }}>✓</span> */}
+                                            <span style={{ marginLeft: '5px', color: 'green', float: 'right', display: message.read == true && message.from_user.username === user.username ? 'block' : 'none' }}>✓</span>
                                         </span>
                                     </div>
                                 </div>
@@ -231,29 +230,51 @@ export const ChatComponent = () => {
                         ))}
                     </ul>
                 </div>
-                <div className="chat-message clearfix" style={{ backgroundColor: '#e5e5e5' }}>
-                    <div className="input-group mb-0">
-                        {/* <ReactQuill
-                            style={{ width: '100%' }}
-                            theme="snow"
-                            defaultValue={message}
-                            onChange={handleQuillChange}
-                            onKeyPress={ha
-                                ndleKeyPress}
-                        /> */}
-                        <InputEmoji
-                            cleanOnEnter
-                            onChange={setMessage}
-                            onEnter={handleKeyPress} value={message} type="text" className="form-control" placeholder="Enter text here..."
-                        />
-                        {/* <input onKeyPress={handleKeyPress} value={message} onChange={(e) => setMessage(e.target.value)} type="text" className="form-control" placeholder="Enter text here..." /> */}
-                        {/* <emoji-picker></emoji-picker> */}
 
-                        <div className="input-group-prepend" >
-                            <span className="input-group-text" style={{ backgroundColor: "rgb(88 143 80)", marginTop:'6px' }} onClick={() => { handleSubmit() }}>
-                                <i className="fa fa-send"></i>
-                            </span>
-                        </div>
+
+                <div className="input-group mb-0">
+                    <InputEmoji
+                        cleanOnEnter
+                        onChange={setMessage}
+                        onEnter={handleKeyPress}
+                        value={message}
+                        type="text"
+                        className="form-control"
+                        placeholder="Enter text here..."
+                        style={{ backgroundColor: 'white' }}
+                    />
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleFileChange}
+                    />
+                    <div className="input-group-prepend" style={{ padding: '2px' }}>
+                        <span
+                            className="input-group-text rounded-circle"  // Add the rounded-circle class
+                            style={{
+                                backgroundColor: "white",
+                                marginTop: '6px',
+                                cursor: 'pointer',
+                                border: 'none',  // Remove the border for a cleaner look
+                            }}
+                            onClick={() => {
+                                // Trigger file input click when the button is clicked
+                                fileInputRef.current.click();
+                            }}
+                        >
+                            <i className="fa fa-paperclip" style={{ color: '#555' }}></i> {/* Adjust the color of the paperclip icon */}
+                        </span>
+                    </div>
+
+                    <div className="input-group-prepend" style={{ padding: '2px' }}>
+                        <span
+                            className="input-group-text rounded-circle"  // Add the rounded-circle class
+                            style={{ backgroundColor: "rgb(87 145 255)", marginTop: '6px', cursor: 'pointer' }}
+                            onClick={() => { handleSubmit() }}
+                        >
+                            <i className="fa fa-send"></i>
+                        </span>
                     </div>
                 </div>
             </div>

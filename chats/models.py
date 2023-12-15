@@ -34,6 +34,7 @@ class Message(models.Model):
     content = models.CharField(max_length=512)
     timestamp = models.DateTimeField(auto_now_add=True)
     read = models.BooleanField(default=False)
+    file = models.FileField(upload_to='message_files/', null=True, blank=True)
 
     def __str__(self):
         return f"From {self.from_user.username} to {self.to_user.username}: {self.content} [{self.timestamp}]"
