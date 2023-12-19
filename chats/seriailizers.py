@@ -11,6 +11,15 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["username"]
 
 
+
+
+class UploadDocumentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ["conversation", "from_user", 'to_user', "content", "timestamp", "read", "file"]
+       
+
+
 class MessageSerializer(serializers.ModelSerializer):
     from_user = serializers.SerializerMethodField()
     to_user = serializers.SerializerMethodField()

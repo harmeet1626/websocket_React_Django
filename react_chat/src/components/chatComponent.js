@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import AuthService from '../auth/AuthService';
 import Avatar from 'react-avatar';
@@ -22,9 +22,11 @@ export const ChatComponent = () => {
 
     const [typing, setTyping] = useState(false);
 
+    const [userActive, setUserActive] = useState(false)
+    const location = useLocation()
+
     const { conversationName } = useParams();
     const [loading, setLoading] = useState(true)
-
     function GetName() {
         const fullName = conversationName;
         const nameArray = fullName.split("__");
@@ -57,6 +59,7 @@ export const ChatComponent = () => {
         // onMessage handler
         onMessage: (e) => {
             const data = JSON.parse(e.data);
+            console.log(data, 'websocket triggered')
             switch (data.type) {
                 case "welcome_message":
                     setWelcomeMessage(data.message);
@@ -92,6 +95,7 @@ export const ChatComponent = () => {
                     break;
 
                 case 'typing':
+                    console.log('user typing')
                     // updateTyping(data);
                     break;
 
@@ -101,21 +105,21 @@ export const ChatComponent = () => {
             }
         }
     });
-    useEffect(() => {
-        async function fetchConversation() {
-            const apiRes = await fetch(`http://${apiUrl}conversations/${conversationName}/`, {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: `Token ${user?.token}`
-                }
-            });
-            if (apiRes.status === 200) {
-                const data = await apiRes.json();
-                setConversation(data);
+    async function fetchConversation() {
+        const apiRes = await fetch(`http://${apiUrl}conversations/${conversationName}/`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                Authorization: `Token ${user?.token}`
             }
+        });
+        if (apiRes.status === 200) {
+            const data = await apiRes.json();
+            setConversation(data);
         }
+    }
+    useEffect(() => {
         fetchConversation();
     }, [conversationName, user]);
 
@@ -137,7 +141,7 @@ export const ChatComponent = () => {
 
     useEffect(() => {
         scrollToBottom();
-    }, []); 
+    }, []);
 
     useEffect(() => {
         scrollToBottom();
@@ -147,7 +151,7 @@ export const ChatComponent = () => {
         const containerHeight = containerRef.current.scrollHeight;
         await containerRef.current.scrollTo({
             top: containerHeight,
-            behavior: 'smooth', 
+            behavior: 'instant',
         })
     };
 
@@ -173,19 +177,42 @@ export const ChatComponent = () => {
     const fileInputRef = useRef(null);
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
+
         if (selectedFile) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                const fileContent = event.target.result;
-                sendJsonMessage({
-                    type: 'file',
-                    file_content: fileContent,
-                    file_name: 'Document'
-                })
-            };
-            reader.readAsArrayBuffer(selectedFile);
+            uploadDocument(selectedFile)
         }
     };
+    async function uploadDocument(fileName) {
+        console.log(reverced_messageHistory[0], "message")
+        let sample_message = messageHistory[0]
+        const apiEndpoint = 'http://127.0.0.1:8000/documentUpload/';
+
+        let path = location.pathname
+        var convo = path.substring(6)
+        const form_Data = new FormData()
+        form_Data.append("image", fileName)
+        form_Data.append("convo", convo)
+        form_Data.append("from_user", sample_message.from_user.username)
+        form_Data.append("to_user", sample_message.to_user.username)
+
+        await fetch(apiEndpoint, {
+            method: 'PUT',
+            body: form_Data
+
+        })
+            .then(response => response.json())
+            .then(data => {
+                let file_url = data.response[0].file
+                sendJsonMessage({
+                    type: "file",
+                    file_url
+                })
+            })
+            .catch(error => {
+                console.error('API Error:', error);
+            });
+    }
+
     return (
         <>
             <div className="chat" >
@@ -201,28 +228,45 @@ export const ChatComponent = () => {
                                     size="30"   // Optional: Set the size of the avatar
                                 />&nbsp;&nbsp;
                                 <h6 style={{ padding: "5px", textTransform: 'uppercase' }} className="m-b-0">{GetName()}</h6>
+                                {
+                                    participants.includes(GetName()) ?
+                                        <p style={{ color: 'green', fontSize: '11px' }}>active</p> : ""
+                                }
+
                             </div>
                         </div>
                     </div>
                 </div>
+                {/* <p style={{ display: loading ? 'block' : 'none' }}>loading...</p> */}
                 <div className="chat-history" ref={containerRef} style={{
                     height: '70vh',
                     width: '100%',
                     overflow: 'auto',
                     border: '1px solid #C0C0C0',
                     backgroundColor: '#e3e3e3',
+                    // display: loading ? "none" : 'block'
                 }}>
                     <ul className="m-b-0">
                         {reverced_messageHistory.map((message, index) => (
                             <li className="clearfix" key={index}>
                                 <div>
                                     <div style={{ padding: "5px 20px", backgroundColor: message.from_user.username === user.username ? "rgb(133 196 235)" : "#f3f3f3" }} className={message.from_user.username === user.username ? "message other-message float-right" : "message my-message"}>
-                                        {message.content}
+                                        {message.content == "" ?
+
+                                            // <a href={'http://127.0.0.1:8000'+message.file} target="_blank" rel="noopener noreferrer">
+                                            //     View Document
+                                            // </a>
+                                            <img style={{ height: "150px" }} src={'http://127.0.0.1:8000' + message.file} />
+                                            :
+                                            message.content}
+
                                         <br />
                                         <span style={{ fontSize: "10px", alignSelf: "flex-end", width: '170px', textAlign: "end" }} className={message.from_user.username === user.username ? "message-data-time float-right" : "message-data-time float-right"}>
+                                            <div style={{ display: "flex", float: 'right' }}>
+                                                <span style={{ marginLeft: '5px', display: message.from_user.username === user.username ? "block" : "none" }}>✓</span>
+                                                <span style={{ marginLeft: '-3px', color: 'green', float: 'right', display: message.read == true && message.from_user.username === user.username ? 'block' : 'none' }}>✓</span>
+                                            </div>
                                             {formatTime(message.timestamp)}
-                                            {/* <span style={{ marginLeft: '5px' }}>✓</span> */}
-                                            <span style={{ marginLeft: '5px', color: 'green', float: 'right', display: message.read == true && message.from_user.username === user.username ? 'block' : 'none' }}>✓</span>
                                         </span>
                                     </div>
                                 </div>
@@ -251,15 +295,14 @@ export const ChatComponent = () => {
                     />
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
                         <span
-                            className="input-group-text rounded-circle"  // Add the rounded-circle class
+                            className="input-group-text rounded-circle"
                             style={{
                                 backgroundColor: "white",
                                 marginTop: '6px',
                                 cursor: 'pointer',
-                                border: 'none',  // Remove the border for a cleaner look
+                                border: 'none',
                             }}
                             onClick={() => {
-                                // Trigger file input click when the button is clicked
                                 fileInputRef.current.click();
                             }}
                         >

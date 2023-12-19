@@ -94,9 +94,40 @@ class ChatConsumer(JsonWebsocketConsumer):
                 # This is the receiver
                 return User.objects.get(username=username) 
 
-    def receive_json(self, content, **kwargs):
+    def receive_json(self, content, **kwargs ):
         message_type = content["type"]
+
+        if message_type == "file":            
+            file_content = content.get('file_url', '')
+            message = Message.objects.create(
+                from_user=self.user,
+                to_user=self.get_receiver(),
+                content="",
+                conversation=self.conversation,
+                file=file_content
+            )
+
+            async_to_sync(self.channel_layer.group_send)(
+                self.conversation_name,
+                {
+                    "type": "chat_message_echo",
+                    "name": self.user.username,
+                    "message": MessageSerializer(message).data,
+                },
+            )
+
+            notification_group_name = self.get_receiver().username + "__notifications"
+            async_to_sync(self.channel_layer.group_send)(
+                notification_group_name,
+                {
+                    "type": "new_message_notification",
+                    "name": self.user.username,
+                    "message": MessageSerializer(message).data,
+                },
+            )
+
         if message_type == "chat_message":
+            print("message", content['message'])
             message = Message.objects.create(
                 from_user=self.user,
                 to_user=self.get_receiver(),
@@ -123,24 +154,10 @@ class ChatConsumer(JsonWebsocketConsumer):
                 },
             )        
        
-        if message_type == "file":
-            file_content = content.get('file_content', '')
-            file_name = content.get('file_name', 'Doc')
-            print(file_name, 'file type content recived on the backend ......')
-            # Save the file and get the file URL or identifier
+               
 
-            file_url_or_identifier = handle_file_upload(file_content, 'file_name')
 
-            # Broadcast the file information to connected clients
-            async_to_sync(self.channel_layer.group_send)(
-                self.conversation_name,
-                {
-                    "type": "file_uploaded",
-                    "file_url_or_identifier": file_url_or_identifier,
-                },
-            )
 
-            return super().receive_json(content, **kwargs)
 
         if message_type == "typing":
             async_to_sync(self.channel_layer.group_send)(
@@ -151,6 +168,7 @@ class ChatConsumer(JsonWebsocketConsumer):
                     "typing": content["typing"],
                 },
             )
+            
 
         if message_type == "read_messages":
             print('message readed')
@@ -170,6 +188,8 @@ class ChatConsumer(JsonWebsocketConsumer):
             )
 
         return super().receive_json(content, **kwargs)
+    
+        
     
     def receive_binary(self, byte_data):
         print(byte_data, "testing333333333333333")

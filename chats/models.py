@@ -26,15 +26,16 @@ class Conversation(models.Model):
         return f"{self.name} ({self.get_online_count()})"
 
 
+
 class Message(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
     from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="messages_from_me")
     to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="messages_to_me")
-    content = models.CharField(max_length=512)
+    content = models.CharField(max_length=512, blank = True)
     timestamp = models.DateTimeField(auto_now_add=True)
     read = models.BooleanField(default=False)
-    file = models.FileField(upload_to='message_files/', null=True, blank=True)
+    file = models.FileField(upload_to='static/file', null=True, blank=True)
 
     def __str__(self):
         return f"From {self.from_user.username} to {self.to_user.username}: {self.content} [{self.timestamp}]"
