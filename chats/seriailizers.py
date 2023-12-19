@@ -28,16 +28,17 @@ class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        fields = (
-            "id",
-            "conversation",
-            "from_user",
-            "to_user",
-            "content",
-            "timestamp",
-            "read",
-            "file"
-        )
+        fields = ("__all__")
+        # fields = (
+        #     "id",
+        #     "conversation",
+        #     "from_user",
+        #     "to_user",
+        #     "content",
+        #     "timestamp",
+        #     "read",
+        #     "file"
+        # )
 
     def get_conversation(self, obj):
         return str(obj.conversation.id)

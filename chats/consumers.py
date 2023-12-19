@@ -128,14 +128,12 @@ class ChatConsumer(JsonWebsocketConsumer):
             )
 
         if message_type == "chat_message":
-            print("message", content['message'])
             message = Message.objects.create(
                 from_user=self.user,
                 to_user=self.get_receiver(),
                 content=content["message"],
                 conversation=self.conversation
             )
-
             async_to_sync(self.channel_layer.group_send)(
                 self.conversation_name,
                 {
@@ -192,9 +190,6 @@ class ChatConsumer(JsonWebsocketConsumer):
     
         
     
-    def receive_binary(self, byte_data):
-        print(byte_data, "testing333333333333333")
-    
    
 
 
@@ -215,19 +210,6 @@ class ChatConsumer(JsonWebsocketConsumer):
         return json.dumps(content, cls=UUIDEncoder)
 
 
-# @database_sync_to_async
-def handle_file_upload(self, file_content, file_name):
-    # Create a unique filename
-    print(file_name, "filename>>>>>>>>>>>")
-    unique_filename = f'{uuid.uuid4()}_{file_name}'
-
-    # Save the file to the media directory
-    file_path = default_storage.save(f'uploads/{unique_filename}', ContentFile(file_content))
-
-    # Construct the full file URL
-    file_url = f'{settings.MEDIA_URL}{file_path}'
-
-    return file_url
 
 class NotificationConsumer(JsonWebsocketConsumer):
     def __init__(self, *args, **kwargs):

@@ -40,7 +40,6 @@ export const ChatComponent = () => {
     }
     useEffect(() => {
 
-        console.log(reverced_messageHistory, "message history")
     }, [reverced_messageHistory])
 
     const apiUrl = process.env.REACT_APP_API_BASE_URL;
@@ -59,7 +58,6 @@ export const ChatComponent = () => {
         // onMessage handler
         onMessage: (e) => {
             const data = JSON.parse(e.data);
-            console.log(data, 'websocket triggered')
             switch (data.type) {
                 case "welcome_message":
                     setWelcomeMessage(data.message);
@@ -196,7 +194,6 @@ export const ChatComponent = () => {
             .then(response => response.json())
             .then(data => {
                 let file_url = data.response[0].file.file
-                console.log(data, "res")
                 sendJsonMessage({
                     type: "file",
                     file_url
@@ -222,9 +219,17 @@ export const ChatComponent = () => {
                                     size="30"   // Optional: Set the size of the avatar
                                 />&nbsp;&nbsp;
                                 <h6 style={{ padding: "5px", textTransform: 'uppercase' }} className="m-b-0">{GetName()}</h6>
+
                                 {
                                     participants.includes(GetName()) ?
-                                        <p style={{ color: 'green', fontSize: '11px' }}>active</p> : ""
+                                        <p style={{
+                                            position: "abselute",
+                                            width: "10px",
+                                            height: "10px",
+                                            backgroundColor: "rgb(41 122 40)",
+                                            borderRadius: "50%",
+                                            marginTop: '8%'
+                                        }}></p> : ""
                                 }
 
                             </div>
@@ -238,6 +243,7 @@ export const ChatComponent = () => {
                     overflow: 'auto',
                     border: '1px solid #C0C0C0',
                     backgroundColor: '#e3e3e3',
+                    borderRadius: "30px"
                     // display: loading ? "none" : 'block'
                 }}>
                     <ul className="m-b-0">
@@ -286,6 +292,7 @@ export const ChatComponent = () => {
                         ref={fileInputRef}
                         style={{ display: 'none' }}
                         onChange={handleFileChange}
+                        accept="image/png, image/jpeg"
                     />
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
                         <span
