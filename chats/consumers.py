@@ -97,7 +97,8 @@ class ChatConsumer(JsonWebsocketConsumer):
     def receive_json(self, content, **kwargs ):
         message_type = content["type"]
 
-        if message_type == "file":            
+        if message_type == "file":
+            
             file_content = content.get('file_url', '')
             message = Message.objects.create(
                 from_user=self.user,

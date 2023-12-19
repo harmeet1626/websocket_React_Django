@@ -183,17 +183,10 @@ export const ChatComponent = () => {
         }
     };
     async function uploadDocument(fileName) {
-        console.log(reverced_messageHistory[0], "message")
-        let sample_message = messageHistory[0]
         const apiEndpoint = 'http://127.0.0.1:8000/documentUpload/';
 
-        let path = location.pathname
-        var convo = path.substring(6)
         const form_Data = new FormData()
         form_Data.append("image", fileName)
-        form_Data.append("convo", convo)
-        form_Data.append("from_user", sample_message.from_user.username)
-        form_Data.append("to_user", sample_message.to_user.username)
 
         await fetch(apiEndpoint, {
             method: 'PUT',
@@ -202,7 +195,8 @@ export const ChatComponent = () => {
         })
             .then(response => response.json())
             .then(data => {
-                let file_url = data.response[0].file
+                let file_url = data.response[0].file.file
+                console.log(data, "res")
                 sendJsonMessage({
                     type: "file",
                     file_url

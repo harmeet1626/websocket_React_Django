@@ -1,7 +1,7 @@
 from chats.models import Conversation
 from rest_framework import serializers
 
-from chats.models import Message
+from chats.models import Message, Media
 from django.contrib.auth.models import User
 
 
@@ -15,8 +15,9 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UploadDocumentsSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Message
-        fields = ["conversation", "from_user", 'to_user', "content", "timestamp", "read", "file"]
+        model = Media
+        fields = ["file"]
+        # fields = ["conversation", "from_user", 'to_user', "content", "timestamp", "read", "file"]
        
 
 

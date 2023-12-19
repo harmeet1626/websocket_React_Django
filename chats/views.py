@@ -80,38 +80,17 @@ class CreateUserView(CreateAPIView):
 class UploadDocument(UpdateAPIView):
     queryset = Message.objects.all()
     serializer_class = UploadDocumentsSerializer
-    # parser_classes = (MultiPartParser, FormParser)  # Add these parser classes for file uploads
-
     def put(self, request):
         try:
-            convo_name = request.data.get('convo')
             file = request.data.get('image')
-            print(file,777777777777)
-            from_user = request.data.get('from_user')
-            to_user = request.data.get('to_user')
-
-            conversation = Conversation.objects.filter(name=convo_name).first()
-            from_user = User.objects.filter(username = from_user).first()
-            to_user = User.objects.filter(username = to_user).first()
-            
-            if not conversation:
-                return Response({"status": 400, "error": "Conversation not found."})
-
-            # Initialize the serializer with the correct field names
             serializer = UploadDocumentsSerializer(data={
-                'conversation': conversation.id,
-                'from_user': from_user.id,
-                'to_user': to_user.id,
-                'content': '',  # You may want to set the content appropriately
                 'file':file
             })
 
-            # Check if the serializer is valid before saving
             if serializer.is_valid():
-                # Save the serializer, which will handle the file upload
                 serializer.save()
-                response_array = [{"text": "Your Document has uploaded Successfully", "file":serializer.data['file']}]
-                print(serializer.data)
+                response_array = [{"text": "Your Document has uploaded Successfully", "file":serializer.data}]
+                
                 return Response({"status": 200, "response": response_array, "document": ""})
             else:
                 print(serializer.errors)
