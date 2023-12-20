@@ -1,6 +1,8 @@
 from chats.models import Conversation
 from rest_framework import serializers
-
+from cryptography.fernet import Fernet
+import base64
+from rest_framework.response import Response
 from chats.models import Message, Media
 from django.contrib.auth.models import User
 
@@ -17,7 +19,6 @@ class UploadDocumentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Media
         fields = ["file"]
-        # fields = ["conversation", "from_user", 'to_user', "content", "timestamp", "read", "file"]
        
 
 
@@ -25,20 +26,26 @@ class MessageSerializer(serializers.ModelSerializer):
     from_user = serializers.SerializerMethodField()
     to_user = serializers.SerializerMethodField()
     conversation = serializers.SerializerMethodField()
+    decode_key = serializers.SerializerMethodField()
+    content = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
         fields = ("__all__")
-        # fields = (
-        #     "id",
-        #     "conversation",
-        #     "from_user",
-        #     "to_user",
-        #     "content",
-        #     "timestamp",
-        #     "read",
-        #     "file"
-        # )
+
+    def get_decode_key(self, obj):
+        try:            
+            binary_data = Message.objects.get(id=obj.id)
+        except Message.DoesNotExist:
+            return Response(status=404)
+        serializer = BinaryDataSerializer(binary_data)
+        return serializer.data['decode_key']
+    
+    def get_content(self, obj):
+        key = obj.decode_key
+        cipher = Fernet(key)
+        decrypted_text = cipher.decrypt(obj.content).decode()
+        return decrypted_text
 
     def get_conversation(self, obj):
         return str(obj.conversation.id)
@@ -48,6 +55,14 @@ class MessageSerializer(serializers.ModelSerializer):
 
     def get_to_user(self, obj):
         return UserSerializer(obj.to_user).data
+
+
+
+
+class BinaryDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+        fields = ['decode_key']
 
 
 class ConversationSerializer(serializers.ModelSerializer):

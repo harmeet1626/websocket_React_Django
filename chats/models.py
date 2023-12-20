@@ -1,9 +1,9 @@
 import uuid
-
+from cryptography.fernet import Fernet
 from django.contrib.auth import get_user_model
 from django.db import models
-
 User = get_user_model()
+
 
 
 class Conversation(models.Model):
@@ -32,10 +32,22 @@ class Message(models.Model):
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name="messages")
     from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="messages_from_me")
     to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="messages_to_me")
-    content = models.CharField(max_length=512, blank = True)
+    content = models.BinaryField(max_length=10000,blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     read = models.BooleanField(default=False)
     file = models.FileField(upload_to='static/file', null=True, blank=True)
+    decode_key = models.BinaryField(max_length=100, blank=True)
+
+
+    def save(self, *args, **kwargs):
+        # Encrypt the content before saving
+        key = Fernet.generate_key()
+        self.decode_key=key
+        cipher = Fernet(key)
+        content = cipher.encrypt(self.content.encode())
+        self.content = content
+        super().save(*args, **kwargs)
+    
 
     def __str__(self):
         return f"From {self.from_user.username} to {self.to_user.username}: {self.content} [{self.timestamp}]"

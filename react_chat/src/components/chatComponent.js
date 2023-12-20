@@ -250,7 +250,7 @@ export const ChatComponent = () => {
                         {reverced_messageHistory.map((message, index) => (
                             <li className="clearfix" key={index}>
                                 <div>
-                                    <div style={{ padding: "5px 20px", backgroundColor: message.from_user.username === user.username ? "rgb(133 196 235)" : "#f3f3f3" }} className={message.from_user.username === user.username ? "message other-message float-right" : "message my-message"}>
+                                    <div style={{ padding: "5px 20px", wordBreak:"break-word" ,backgroundColor: message.from_user.username === user.username ? "rgb(133 196 235)" : "#f3f3f3" }} className={message.from_user.username === user.username ? "message other-message float-right" : "message my-message"}>
                                         {message.content == "" ?
 
                                             // <a href={'http://127.0.0.1:8000'+message.file} target="_blank" rel="noopener noreferrer">
