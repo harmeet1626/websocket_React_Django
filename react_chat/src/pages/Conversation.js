@@ -44,7 +44,7 @@ export const Conversation = () => {
         padding: '10px',
         fontSize: '16px',
         border: '2px solid #ccc',
-        borderRadius: '5px',
+        borderRadius: '30px',
         outline: 'none',
         width: '100%',
         height: "40px"

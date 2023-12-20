@@ -181,7 +181,7 @@ export const ChatComponent = () => {
         }
     };
     async function uploadDocument(fileName) {
-        const apiEndpoint = 'http://127.0.0.1:8000/documentUpload/';
+        const apiEndpoint = `http://${apiUrl}documentUpload/`;
 
         const form_Data = new FormData()
         form_Data.append("image", fileName)
