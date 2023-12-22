@@ -1,7 +1,7 @@
 from chats.seriailizers import UserSerializer
 from chats.seriailizers import ConversationSerializer
-from chats.models import Conversation, Message
-from chats.seriailizers import MessageSerializer, CreateUserSerializer, UploadDocumentsSerializer
+from chats.models import Conversation, Message, Participants, Groups, Group_content
+from chats.seriailizers import MessageSerializer, CreateUserSerializer, UploadDocumentsSerializer, participantSerializer, Group_content_serializer, Groups_serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
@@ -13,6 +13,7 @@ from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
 from django.contrib.auth.hashers import make_password
 from rest_framework.views import APIView
 from django.shortcuts import redirect
+from django.http import JsonResponse
 
 
 
@@ -99,3 +100,28 @@ class UploadDocument(UpdateAPIView):
         except Exception as e:
             print("Internal server error:", str(e))
             return Response({"status": 500, "error": str(e)})
+
+
+
+class User_group(ListAPIView):
+    serializer_class = Group_content_serializer
+
+    def get_queryset(self):
+        queryset = Participants.objects.filter(user__username=self.request.user).values()
+        if not queryset:
+            return Group_content.objects.none()
+        
+        groupName = []
+        for group in queryset:
+            group = Groups.objects.filter(id = group['group_id']).values()
+            for i in group:
+                groupName.append(i['name'])
+        res = {"res":groupName}
+        return groupName
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        return Response({"res": queryset})
+
+
+

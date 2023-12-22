@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from chats.views import CustomObtainAuthTokenView
-from chats.views import ConversationViewSet, MessageViewSet,UserViewSet, CreateUserView,UploadDocument
+from chats.views import ConversationViewSet, MessageViewSet,UserViewSet, CreateUserView,UploadDocument, User_group
 from rest_framework.routers import DefaultRouter
 
 
@@ -15,4 +15,5 @@ urlpatterns = router.urls + [
     path("auth-token/", CustomObtainAuthTokenView.as_view()),
     path('create-user/', CreateUserView.as_view(), name='create-user'),
     path('documentUpload/',UploadDocument.as_view(), name='documentUpload'),
+    path('UserGroup/',User_group.as_view(), name='User_group'),
 ]

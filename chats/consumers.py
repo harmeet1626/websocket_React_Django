@@ -1,8 +1,8 @@
 from asgiref.sync import async_to_sync
 from channels.generic.websocket import JsonWebsocketConsumer
-from chats.models import Conversation, Message
+from chats.models import Conversation, Message, Groups, Group_content
 from django.contrib.auth.models import User
-from chats.seriailizers import MessageSerializer
+from chats.seriailizers import MessageSerializer, Group_content_serializer
 from channels.db import database_sync_to_async
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
@@ -251,3 +251,68 @@ class NotificationConsumer(JsonWebsocketConsumer):
 
     def unread_count(self, event):
         self.send_json(event)
+
+
+
+class GroupChat(JsonWebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(args, kwargs)
+        self.room_name = None
+        self.user = None
+        self.group_name = None
+        self.group = None
+
+    def connect(self):
+        self.user = self.scope["user"]
+        if not self.user.is_authenticated:
+            return
+
+        print("Connected!")
+        self.room_name = "home"
+        self.accept()
+        self.group_name = f"{self.scope['url_route']['kwargs']['group_name']}"
+        self.group = Groups.objects.filter(name = self.group_name ).values()
+        messages = Group_content.objects.filter(group_id = self.group[0]['id']).order_by( "-timestamp").values()
+        self.send_json(
+            {
+                "type": "last_50_messages",
+                "messages": Group_content_serializer(messages, many=True).data,
+                # "has_more": message_count > 50,
+            }
+        )
+
+
+        # self.conversation, created = Conversation.objects.get_or_create(name=self.conversation_name)
+
+        # async_to_sync(self.channel_layer.group_add)(
+        #     self.conversation_name,
+        #     self.channel_name,
+        # )
+
+        # self.send_json(
+        #     {
+        #         "type": "online_user_list",
+        #         "users": [user.username for user in self.conversation.online.all()],
+        #     }
+        # )
+
+        # async_to_sync(self.channel_layer.group_send)(
+        #     self.conversation_name,
+        #     {
+        #         "type": "user_join",
+        #         "user": self.user.username,
+        #     },
+        # )
+
+        # self.conversation.online.add(self.user)
+
+        # messages = self.conversation.messages.all().order_by(
+        #     "-timestamp")[0:50]
+        # message_count = self.conversation.messages.all().count()
+        # self.send_json(
+        #     {
+        #         "type": "last_50_messages",
+        #         "messages": MessageSerializer(messages, many=True).data,
+        #         "has_more": message_count > 50,
+        #     }
+        # )

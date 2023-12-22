@@ -3,7 +3,7 @@ from rest_framework import serializers
 from cryptography.fernet import Fernet
 import base64
 from rest_framework.response import Response
-from chats.models import Message, Media
+from chats.models import Message, Media, Participants, Group_content, Groups
 from django.contrib.auth.models import User
 
 
@@ -94,3 +94,32 @@ class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'password']  # Add other fields as needed
+
+
+class participantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Participants
+        fields = '__all__'
+
+
+
+
+class Group_content_serializer(serializers.ModelSerializer):
+    from_user_id = serializers.SerializerMethodField()
+    class Meta:
+        model = Group_content
+        fields = ["group_id","content", 'from_user_id', "timestamp"]
+    
+    def get_from_user_id(self, obj):
+        user_id = obj['from_user_id']
+        user = User.objects.get(id=user_id)
+        username = user.username
+        return username
+    
+
+
+
+class Groups_serializers(serializers.ModelSerializer):
+    class Meta:
+        model = Groups
+        fields = ['name']

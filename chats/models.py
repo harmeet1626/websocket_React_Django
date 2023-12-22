@@ -36,7 +36,7 @@ class Message(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     read = models.BooleanField(default=False)
     file = models.FileField(upload_to='static/file', null=True, blank=True)
-    decode_key = models.BinaryField(max_length=100, blank=True)
+    decode_key = models.BinaryField(max_length=10000, blank=True)
 
 
     def save(self, *args, **kwargs):
@@ -56,3 +56,19 @@ class Message(models.Model):
 class Media(models.Model):
     
     file = models.FileField(upload_to='static/file', null=True, blank=True)
+
+
+
+class Groups(models.Model):
+    name = models.CharField(max_length=500)
+
+
+class Participants(models.Model):
+    group = models.ForeignKey(Groups, on_delete = models.CASCADE)
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+
+class Group_content(models.Model):
+    group = models.ForeignKey(Groups, on_delete = models.CASCADE)
+    content = models.CharField(max_length=500,blank=True)
+    from_user = models.ForeignKey(User, on_delete = models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
