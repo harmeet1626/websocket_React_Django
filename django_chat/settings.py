@@ -155,6 +155,19 @@ CHANNEL_LAYERS = {
         },
     },
 }
+
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels.layers.InMemoryChannelLayer',  # or use another backend
+#         'CONFIG': {
+            
+#             "expiry": 10,
+#         },
+#     },
+# }
+
+
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.AllowAny',

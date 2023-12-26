@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useParams } from "react-router-dom"
 import Avatar from 'react-avatar';
 import AuthService from '../auth/AuthService';
@@ -9,8 +9,10 @@ export const GroupChat = () => {
     const params = useParams()
     const apiUrl = process.env.REACT_APP_API_BASE_URL;
     const [messageHistory, setMessageHistory] = useState([]);
+    const [message, setMessage] = useState("");
     const [user, setUser] = useState(() => AuthService.getCurrentUser())
     const reverced_messageHistory = [...messageHistory].reverse()
+    const containerRef = useRef(null);
     const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://${apiUrl}groupChat/${params.groupName}/` : null, {
         queryParams: {
             token: user ? user.token : "",
@@ -24,6 +26,7 @@ export const GroupChat = () => {
         // onMessage handler
         onMessage: (e) => {
             const data = JSON.parse(e.data);
+            console.log('websocket triggered')
             switch (data.type) {
                 case "welcome_message":
                     // setWelcomeMessage(data.message);
@@ -33,6 +36,7 @@ export const GroupChat = () => {
                     // const fileUrlOrIdentifier = data.file_url_or_identifier;
                     break;
                 case "chat_message_echo":
+                    console.log(data, 'event is wotking for message')
                     // setMessageHistory((prev) => [data.message, ...prev]);
                     // sendJsonMessage({ type: "read_messages" });
                     break;
@@ -77,6 +81,31 @@ export const GroupChat = () => {
         const formattedTime = `${hours}:${minutes}`;
         return formattedTime
     }
+    const handleSubmit = () => {
+        if (message.length === 0) return;
+        if (message.length > 512) return;
+        sendJsonMessage({
+            type: "group_chat_message",
+            message
+        });
+        setMessage("");
+    };
+    const handleKeyPress = (e) => {
+        handleSubmit()
+    };
+    useEffect(() => {
+        scrollToBottom()
+    }, [])
+    useEffect(() => {
+        scrollToBottom();
+    }, [messageHistory]);
+    const scrollToBottom = async () => {
+        const containerHeight = containerRef.current.scrollHeight;
+        await containerRef.current.scrollTo({
+            top: containerHeight,
+            behavior: 'instant',
+        })
+    };
     return (
         <>
             <div className="chat" >
@@ -88,36 +117,21 @@ export const GroupChat = () => {
                             <div className="chat-about" style={{ display: "flex" }}>
                                 <Avatar
                                     name={params.groupName}
-                                    round={true} // Optional: Makes the avatar round
-                                    size="30"   // Optional: Set the size of the avatar
+                                    round={true} 
+                                    size="30"   
                                 />&nbsp;&nbsp;
                                 <h6 style={{ padding: "5px", textTransform: 'uppercase' }} className="m-b-0">{params.groupName}</h6>
-
-                                {/* {
-                                    participants.includes(params.groupName) ?
-                                        <p style={{
-                                            position: "abselute",
-                                            width: "10px",
-                                            height: "10px",
-                                            backgroundColor: "rgb(41 122 40)",
-                                            borderRadius: "50%",
-                                            marginTop: '8%'
-                                        }}></p> : ""
-                                } */}
-
                             </div>
                         </div>
                     </div>
                 </div>
-                {/* <p style={{ display: loading ? 'block' : 'none' }}>loading...</p> */}
-                <div className="chat-history" style={{
+                <div className="chat-history" ref={containerRef} style={{
                     height: '70vh',
                     width: '100%',
                     overflow: 'auto',
                     border: '1px solid #C0C0C0',
                     backgroundColor: '#e3e3e3',
                     borderRadius: "30px"
-                    // display: loading ? "none" : 'block'
                 }}>
                     <ul className="m-b-0">
                         {reverced_messageHistory.map((message, index) => (
@@ -125,7 +139,7 @@ export const GroupChat = () => {
                                 <div>
                                     <div style={{ padding: "5px 20px", wordBreak: "break-word", backgroundColor: message.from_user_id === user.username ? "rgb(133 196 235)" : "#f3f3f3" }} className={message.from_user_id === user.username ? "message other-message float-right" : "message my-message"}>
                                         {message.from_user_id == user.username ? "" :
-                                            <div style={{ color: 'maroon', textTransform: 'capitalize', fontSize: '12px', height: '20px' }}>{message.from_user_id}</div>
+                                            <div style={{ fontWeight: "bold", color: 'maroon', textTransform: 'capitalize', fontSize: '12px', height: '20px' }}>{message.from_user_id}</div>
                                         }
                                         {message.content == "" ?
                                             <img style={{ height: "150px" }} src={'http://127.0.0.1:8000' + message.file} />
@@ -152,9 +166,9 @@ export const GroupChat = () => {
                 <div className="input-group mb-0">
                     <InputEmoji
                         cleanOnEnter
-                        // onChange={setMessage}
-                        // onEnter={handleKeyPress}
-                        // value={message}
+                        onChange={setMessage}
+                        onEnter={handleKeyPress}
+                        value={message}
                         type="text"
                         className="form-control"
                         placeholder="Enter text here..."
@@ -180,15 +194,15 @@ export const GroupChat = () => {
                         //     fileInputRef.current.click();
                         // }}
                         >
-                            <i className="fa fa-paperclip" style={{ color: '#555' }}></i> {/* Adjust the color of the paperclip icon */}
+                            <i className="fa fa-paperclip" style={{ color: '#555' }}></i>
                         </span>
                     </div>
 
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
                         <span
-                            className="input-group-text rounded-circle"  // Add the rounded-circle class
+                            className="input-group-text rounded-circle"  
                             style={{ backgroundColor: "rgb(87 145 255)", marginTop: '6px', cursor: 'pointer' }}
-                        // onClick={() => { handleSubmit() }}
+                            onClick={() => { handleSubmit() }}
                         >
                             <i className="fa fa-send"></i>
                         </span>

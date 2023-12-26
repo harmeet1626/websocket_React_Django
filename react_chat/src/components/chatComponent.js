@@ -64,6 +64,7 @@ export const ChatComponent = () => {
                     const fileUrlOrIdentifier = data.file_url_or_identifier;
                     break;
                 case "chat_message_echo":
+                    console.log('chat_message_echo',data.message)
                     setMessageHistory((prev) => [data.message, ...prev]);
                     sendJsonMessage({ type: "read_messages" });
                     break;

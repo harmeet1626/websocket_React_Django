@@ -9,6 +9,8 @@ from django.core.files.storage import default_storage
 from django.conf import settings
 import json
 from uuid import UUID
+from channels.layers import get_channel_layer
+
 
 
 
@@ -38,6 +40,7 @@ class ChatConsumer(JsonWebsocketConsumer):
         self.accept()
 
         self.conversation_name = f"{self.scope['url_route']['kwargs']['conversation_name']}"
+
         self.conversation, created = Conversation.objects.get_or_create(
             name=self.conversation_name)
 
@@ -45,6 +48,7 @@ class ChatConsumer(JsonWebsocketConsumer):
             self.conversation_name,
             self.channel_name,
         )
+
 
         self.send_json(
             {
@@ -133,7 +137,9 @@ class ChatConsumer(JsonWebsocketConsumer):
                 content=content["message"],
                 conversation=self.conversation
             )
-            async_to_sync(self.channel_layer.group_send)(
+            channel_layer = get_channel_layer()
+            
+            async_to_sync(channel_layer.group_send)(
                 self.conversation_name,
                 {
                     "type": "chat_message_echo",
@@ -142,15 +148,15 @@ class ChatConsumer(JsonWebsocketConsumer):
                 },
             )
 
-            notification_group_name = self.get_receiver().username + "__notifications"
-            async_to_sync(self.channel_layer.group_send)(
-                notification_group_name,
-                {
-                    "type": "new_message_notification",
-                    "name": self.user.username,
-                    "message": MessageSerializer(message).data,
-                },
-            )        
+            # notification_group_name = self.get_receiver().username + "__notifications"
+            # async_to_sync(self.channel_layer.group_send)(
+            #     notification_group_name,
+            #     {
+            #         "type": "new_message_notification",
+            #         "name": self.user.username,
+            #         "message": MessageSerializer(message).data,
+            #     },
+            # )        
        
                
 
@@ -282,37 +288,112 @@ class GroupChat(JsonWebsocketConsumer):
         )
 
 
-        # self.conversation, created = Conversation.objects.get_or_create(name=self.conversation_name)
 
-        # async_to_sync(self.channel_layer.group_add)(
-        #     self.conversation_name,
-        #     self.channel_name,
-        # )
 
-        # self.send_json(
-        #     {
-        #         "type": "online_user_list",
-        #         "users": [user.username for user in self.conversation.online.all()],
-        #     }
-        # )
 
-        # async_to_sync(self.channel_layer.group_send)(
-        #     self.conversation_name,
-        #     {
-        #         "type": "user_join",
-        #         "user": self.user.username,
-        #     },
-        # )
 
-        # self.conversation.online.add(self.user)
 
-        # messages = self.conversation.messages.all().order_by(
-        #     "-timestamp")[0:50]
-        # message_count = self.conversation.messages.all().count()
-        # self.send_json(
-        #     {
-        #         "type": "last_50_messages",
-        #         "messages": MessageSerializer(messages, many=True).data,
-        #         "has_more": message_count > 50,
-        #     }
-        # )
+
+    def receive_json(self, content, **kwargs ):
+        message_type = content["type"]       
+
+        if message_type == "group_chat_message":
+
+            content=content["message"]
+            group_id = self.group[0]['id']
+            user_id = self.user.id
+            group_instance = Groups.objects.get(id = group_id)
+            messageSerializer = Group_content.objects.create(
+                group = group_instance,
+                from_user=self.user,
+                content=content,
+            )
+
+            messages = Group_content.objects.filter(group_id = self.group[0]['id']).order_by( "-timestamp").values()
+
+
+
+            async_to_sync(self.channel_layer.group_send)(
+                self.group_name,
+                {
+                    "type": "chat_message_echo",
+                    "name": self.user.username,
+                    "message": Group_content_serializer(messages, many=True).data,
+                },
+            )
+
+
+            # self.send(text_data=json.dumps({
+            #     "type": "chat_message_echo",
+            # 'message': 'Your message was received on the server.'
+            # }))
+
+            
+
+
+
+        if message_type == "group_file":
+        
+            file_content = content.get('file_url', '')
+            message = Message.objects.create(
+                from_user=self.user,
+                to_user=self.get_receiver(),
+                content="",
+                conversation=self.conversation,
+                file=file_content
+            )
+
+            async_to_sync(self.channel_layer.group_send)(
+                self.conversation_name,
+                {
+                    "type": "chat_message_echo",
+                    "name": self.user.username,
+                    "message": MessageSerializer(message).data,
+                },
+            )
+
+            notification_group_name = self.get_receiver().username + "__notifications"
+            async_to_sync(self.channel_layer.group_send)(
+                notification_group_name,
+                {
+                    "type": "new_message_notification",
+                    "name": self.user.username,
+                    "message": MessageSerializer(message).data,
+                },
+            )
+   
+       
+               
+
+
+
+
+        if message_type == "group_typing":
+            async_to_sync(self.channel_layer.group_send)(
+                self.conversation_name,
+                {
+                    "type": "typing",
+                    "user": self.user.username,
+                    "typing": content["typing"],
+                },
+            )
+            
+
+        if message_type == "group_read_messages":
+            print('message readed')
+            messages_to_me = self.conversation.messages.filter(
+                to_user=self.user)
+            messages_to_me.update(read=True)
+
+            # Update the unread message count
+            unread_count = Message.objects.filter(
+                to_user=self.user, read=False).count()
+            async_to_sync(self.channel_layer.group_send)(
+                self.user.username + "__notifications",
+                {
+                    "type": "unread_count",
+                    "unread_count": unread_count,
+                },
+            )
+
+        return super().receive_json(content, **kwargs)

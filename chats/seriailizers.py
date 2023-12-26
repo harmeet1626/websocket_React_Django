@@ -115,6 +115,8 @@ class Group_content_serializer(serializers.ModelSerializer):
         user = User.objects.get(id=user_id)
         username = user.username
         return username
+        
+
     
 
 
@@ -123,3 +125,5 @@ class Groups_serializers(serializers.ModelSerializer):
     class Meta:
         model = Groups
         fields = ['name']
+
+
