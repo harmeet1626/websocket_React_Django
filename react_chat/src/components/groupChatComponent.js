@@ -28,7 +28,6 @@ export const GroupChat = () => {
         // onMessage handler
         onMessage: (e) => {
             const data = JSON.parse(e.data);
-            console.log('websocket triggered')
             switch (data.type) {
                 case "welcome_message":
                     // setWelcomeMessage(data.message);
@@ -38,13 +37,11 @@ export const GroupChat = () => {
                     // const fileUrlOrIdentifier = data.file_url_or_identifier;
                     break;
                 case "chat_message_echo":
-                    console.log(data, 'event is wotking for message')
                     setMessageHistory(data.message)
                     // setMessageHistory((prev) => [data.message, ...prev]);
                     // sendJsonMessage({ type: "read_messages" });
                     break;
                 case "last_50_messages":
-                    console.log(data.messages)
                     setMessageHistory(data.messages);
                     // setHasMoreMessages(data.has_more);
                     break;
@@ -130,7 +127,6 @@ export const GroupChat = () => {
         })
             .then(response => response.json())
             .then(data => {
-                console.log(data, "file uploaded")
                 let file_url = data.response[0].file.file
                 sendJsonMessage({
                     type: "group_file",

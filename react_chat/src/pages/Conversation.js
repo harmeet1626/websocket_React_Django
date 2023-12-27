@@ -76,20 +76,12 @@ export const Conversation = () => {
     };
 
     const [searchTerm, setSearchTerm] = useState('');
-    const filteredData = users?.filter((item) =>
-        item.username.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    const handleSearch = (e) => {
-        setSearchTerm(e.target.value);
-    };
     const [show, setShow] = useState(false);
-
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
     const [groupNameInput, setGroupNameInput] = useState("")
     const [checkedUsers, setCheckedUsers] = useState([user.username]);
     const handleCheckboxChange = (username) => {
-        // If the username is in the array, remove it; otherwise, add it
         setCheckedUsers((prevCheckedUsers) =>
             prevCheckedUsers.includes(username)
                 ? prevCheckedUsers.filter((u) => u !== username)
@@ -97,8 +89,6 @@ export const Conversation = () => {
         );
     };
     async function createGroup() {
-        console.log(checkedUsers, "test")
-        console.log(groupNameInput, "groupname")
         if (!user?.username) {
             navigate('/login')
         }
@@ -115,6 +105,19 @@ export const Conversation = () => {
         const data = await res.json();
         fetchGroups()
     }
+    const handleSearch = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    // Filter array1
+    const filteredGroup = groupList.filter((item) =>
+        item.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    // Filter array2
+    const filteredData = users?.filter((item) =>
+        item.username.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
 
@@ -135,7 +138,7 @@ export const Conversation = () => {
 
 
                     <InputGroup size="sm" className="mb-3">
-                        <InputGroup.Text id="inputGroup-sizing-sm">GroupName :- </InputGroup.Text>
+                        <InputGroup.Text id="inputGroup-sizing-sm">Group Name :- </InputGroup.Text>
                         <Form.Control
                             onChange={(e) => setGroupNameInput(e.target.value)}
                             aria-label="Small"
@@ -146,6 +149,7 @@ export const Conversation = () => {
 
 
                     <Form style={{ padding: "10px" }}>
+                        <p>Select participants:-</p>
                         {users
                             .filter((u) => u.username !== user?.username)
                             .map((u) => (
@@ -192,7 +196,7 @@ export const Conversation = () => {
                                         add_box
                                     </span>
                                 </div>
-                                {groupList
+                                {filteredGroup
                                     .map((group, index) => (
                                         <div key={index}>
                                             <li className="clearfix" style={{ borderBottom: "1px solid #ddd" }}>

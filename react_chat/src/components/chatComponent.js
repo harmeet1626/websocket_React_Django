@@ -244,7 +244,7 @@ export const ChatComponent = () => {
                     border: '1px solid #C0C0C0',
                     backgroundColor: '#e3e3e3',
                     borderRadius: "30px",
-                    backgroundImage: 'url("https://img.freepik.com/premium-vector/social-networks-dating-apps-vector-seamless-pattern_341076-469.jpg?size=626&ext=jpg&ga=GA1.1.1797623307.1703658064&semt=ais")'
+                    // backgroundImage: 'url("https://img.freepik.com/premium-vector/social-networks-dating-apps-vector-seamless-pattern_341076-469.jpg?size=626&ext=jpg&ga=GA1.1.1797623307.1703658064&semt=ais")'
                     // display: loading ? "none" : 'block'
                 }}>
                     <ul className="m-b-0">
