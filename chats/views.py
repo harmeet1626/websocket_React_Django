@@ -16,7 +16,6 @@ from django.shortcuts import redirect
 from django.http import JsonResponse
 
 
-
 class CustomObtainAuthTokenView(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -70,10 +69,8 @@ class CreateUserView(CreateAPIView):
     serializer_class = CreateUserSerializer
 
     def create(self, request, *args, **kwargs):
-        # Override the create method to handle password hashing
         password = request.data.get('password')
-        request.data['password'] = make_password(password)  # Assuming you are using Django's make_password function
-
+        request.data['password'] = make_password(password)
         response = super().create(request, *args, **kwargs)
         return response
     
@@ -105,23 +102,40 @@ class UploadDocument(UpdateAPIView):
 
 class User_group(ListAPIView):
     serializer_class = Group_content_serializer
-
     def get_queryset(self):
         queryset = Participants.objects.filter(user__username=self.request.user).values()
         if not queryset:
-            return Group_content.objects.none()
-        
+            return Group_content.objects.none()        
         groupName = []
         for group in queryset:
             group = Groups.objects.filter(id = group['group_id']).values()
             for i in group:
                 groupName.append(i['name'])
-        res = {"res":groupName}
         return groupName
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         return Response({"res": queryset})
 
+
+
+class CreateGroup(CreateAPIView):
+    queryset = Groups.objects.all()
+    serializer_class = Groups_serializers
+
+    def perform_create(self, serializer):
+        username_list = self.request.data.get('usernames', [])
+        group = serializer.save()
+
+        for username in username_list:
+            user = User.objects.get(username=username)
+            Participants.objects.create(group=group, user=user)
+
+    # def perform_create(self, serializer):
+    #     participants_data = self.request.data.pop('participants', [])
+    #     group = serializer.save()
+
+    #     for participant_data in participants_data:
+    #         Participants.objects.create(group=group, **participant_data)
 
 

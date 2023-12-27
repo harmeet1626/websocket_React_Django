@@ -123,6 +123,7 @@ class Group_content_serializer(serializers.ModelSerializer):
 class Groups_serializers(serializers.ModelSerializer):
     class Meta:
         model = Groups
-        fields = ['name']
+        # fields = ['name']
+        fields = "__all__"
 
 

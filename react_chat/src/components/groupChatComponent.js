@@ -217,29 +217,25 @@ export const GroupChat = () => {
                         accept="image/png, image/jpeg"
                     />
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
-                        <span
-                            className="input-group-text rounded-circle"
-                            style={{
-                                backgroundColor: "white",
-                                marginTop: '6px',
-                                cursor: 'pointer',
-                                border: 'none',
-                            }}
+
+                        <span style={{
+                            backgroundColor: "white",
+                            padding: "5px",
+                            marginTop: '10px',
+                            cursor: 'pointer',
+                            border: 'none',
+                        }}
                             onClick={() => {
                                 fileInputRef.current.click();
-                            }}
-                        >
-                            <i className="fa fa-paperclip" style={{ color: '#555' }}></i>
+                            }} class="material-symbols-outlined">
+                            attachment
                         </span>
                     </div>
 
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
-                        <span
-                            className="input-group-text rounded-circle"
-                            style={{ backgroundColor: "rgb(87 145 255)", marginTop: '6px', cursor: 'pointer' }}
-                            onClick={() => { handleSubmit() }}
-                        >
-                            <i className="fa fa-send"></i>
+                        <span style={{ marginTop: '10px', cursor: 'pointer', padding: "5px" }}
+                            onClick={() => { handleSubmit() }} class="material-symbols-outlined">
+                            send
                         </span>
                     </div>
                 </div>

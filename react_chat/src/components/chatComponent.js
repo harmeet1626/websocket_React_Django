@@ -273,7 +273,7 @@ export const ChatComponent = () => {
                 </div>
 
 
-                <div className="input-group mb-0" style={{flexWrap:"unset"}}>
+                <div className="input-group mb-0" style={{ flexWrap: "unset" }}>
                     <InputEmoji
                         cleanOnEnter
                         onChange={setMessage}
@@ -312,13 +312,6 @@ export const ChatComponent = () => {
                             onClick={() => { handleSubmit() }} class="material-symbols-outlined">
                             send
                         </span>
-                        {/* <span
-                            className="input-group-text rounded-circle"  // Add the rounded-circle class
-                            style={{ backgroundColor: "rgb(87 145 255)", marginTop: '6px', cursor: 'pointer' }}
-                            onClick={() => { handleSubmit() }}
-                        >
-                            <i className="fa fa-send"></i>
-                        </span> */}
                     </div>
                 </div>
             </div>

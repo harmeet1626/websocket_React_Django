@@ -5,6 +5,8 @@ import '../style/chat.css'
 import Avatar from 'react-avatar';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import InputGroup from 'react-bootstrap/InputGroup';
+import Form from 'react-bootstrap/Form';
 
 
 export const Conversation = () => {
@@ -14,24 +16,24 @@ export const Conversation = () => {
     const apiUrl = process.env.REACT_APP_API_BASE_URL;
     const location = useLocation()
     const [groupList, setGroupList] = useState([])
-    useEffect(() => {
-        async function fetchUsers() {
-            if (!user?.username) {
-                navigate('/login')
-            }
-            const res = await fetch(`http://${apiUrl}UserGroup/`, {
-                headers: {
-                    Authorization: `Token ${user?.token}`
-                }
-            });
-            const data = await res.json();
-            if (data?.detail == "Invalid token.") {
-                navigate('/login')
-            }
-            // setUsers(data);
-            setGroupList(data.res)
+    async function fetchGroups() {
+        if (!user?.username) {
+            navigate('/login')
         }
-        fetchUsers();
+        const res = await fetch(`http://${apiUrl}UserGroup/`, {
+            headers: {
+                Authorization: `Token ${user?.token}`
+            }
+        });
+        const data = await res.json();
+        if (data?.detail == "Invalid token.") {
+            navigate('/login')
+        }
+        // setUsers(data);
+        setGroupList(data.res)
+    }
+    useEffect(() => {
+        fetchGroups();
     }, [user])
     useEffect(() => {
         async function fetchUsers() {
@@ -84,6 +86,35 @@ export const Conversation = () => {
 
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+    const [groupNameInput, setGroupNameInput] = useState("")
+    const [checkedUsers, setCheckedUsers] = useState([user.username]);
+    const handleCheckboxChange = (username) => {
+        // If the username is in the array, remove it; otherwise, add it
+        setCheckedUsers((prevCheckedUsers) =>
+            prevCheckedUsers.includes(username)
+                ? prevCheckedUsers.filter((u) => u !== username)
+                : [...prevCheckedUsers, username]
+        );
+    };
+    async function createGroup() {
+        console.log(checkedUsers, "test")
+        console.log(groupNameInput, "groupname")
+        if (!user?.username) {
+            navigate('/login')
+        }
+        const res = await fetch(`http://${apiUrl}CreateGroup/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                "name": groupNameInput,
+                "usernames": checkedUsers
+            })
+        });
+        const data = await res.json();
+        fetchGroups()
+    }
 
     return (
 
@@ -96,17 +127,45 @@ export const Conversation = () => {
                     keyboard={false}
                 >
                     <Modal.Header closeButton>
-                        <Modal.Title>Modal title</Modal.Title>
+                        <Modal.Title>Create Group</Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        I will not close if you click outside me. Do not even try to press
-                        escape key.
+                        Please enter the group name
                     </Modal.Body>
+
+
+                    <InputGroup size="sm" className="mb-3">
+                        <InputGroup.Text id="inputGroup-sizing-sm">GroupName :- </InputGroup.Text>
+                        <Form.Control
+                            onChange={(e) => setGroupNameInput(e.target.value)}
+                            aria-label="Small"
+                            aria-describedby="inputGroup-sizing-sm"
+                        />
+                    </InputGroup>
+
+
+
+                    <Form style={{ padding: "10px" }}>
+                        {users
+                            .filter((u) => u.username !== user?.username)
+                            .map((u) => (
+                                <div key={`default-${u.username}`} className="mb-3">
+                                    <Form.Check // prettier-ignore
+                                        type={"checkbox"}
+                                        label={u.username}
+                                        disabled={u.username == user.username ? true : false}
+                                        onChange={() => handleCheckboxChange(u.username)}
+                                    />
+
+                                </div>
+                            ))}
+                    </Form>
+
                     <Modal.Footer>
                         <Button variant="secondary" onClick={handleClose}>
                             Close
                         </Button>
-                        <Button variant="primary">Understood</Button>
+                        <Button variant="primary" onClick={() => createGroup()}>Create Group</Button>
                     </Modal.Footer>
                 </Modal>
                 <div className="card chat-app" style={{ backgroundColor: "whitesmoke", display: "flex" }}>
