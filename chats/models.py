@@ -71,3 +71,4 @@ class Group_content(models.Model):
     content = models.CharField(max_length=500,blank=True)
     from_user = models.ForeignKey(User, on_delete = models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
+    file = models.FileField(upload_to='static/file', null=True, blank=True)

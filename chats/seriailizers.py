@@ -106,21 +106,20 @@ class participantSerializer(serializers.ModelSerializer):
 
 class Group_content_serializer(serializers.ModelSerializer):
     from_user_id = serializers.SerializerMethodField()
+    file = serializers.SerializerMethodField()
     class Meta:
         model = Group_content
-        fields = ["group_id","content", 'from_user_id', "timestamp"]
+        fields = ["group_id", "content", 'from_user_id', "timestamp", "file"]
     
     def get_from_user_id(self, obj):
         user_id = obj['from_user_id']
         user = User.objects.get(id=user_id)
         username = user.username
         return username
-        
-
+    def get_file(self, obj):
+        return obj['file']
     
-
-
-
+    
 class Groups_serializers(serializers.ModelSerializer):
     class Meta:
         model = Groups

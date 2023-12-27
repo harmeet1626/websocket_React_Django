@@ -21,7 +21,9 @@ export default function Navbar() {
     return (
         <MDBNavbar expand='lg' style={{ backgroundColor: "rgb(41 155 211)" }}>
             <MDBContainer fluid>
-                <MDBNavbarBrand href='#'><img style={{ height: '5vh' }} src='https://icons.veryicon.com/png/o/miscellaneous/basic-icon/message-54.png' />Chat Application</MDBNavbarBrand>
+                <MDBNavbarBrand href='#'><span style={{ padding: "2px" }} class="material-symbols-outlined">
+                    forum
+                </span> Chat Application</MDBNavbarBrand>
                 <MDBNavbarToggler
                     type='button'
                     aria-expanded='false'

@@ -64,10 +64,12 @@ export const ChatComponent = () => {
                     const fileUrlOrIdentifier = data.file_url_or_identifier;
                     break;
                 case "chat_message_echo":
-                    console.log('chat_message_echo',data.message)
+                    console.log('chat_message_echo', data.message)
                     setMessageHistory((prev) => [data.message, ...prev]);
                     sendJsonMessage({ type: "read_messages" });
                     break;
+                case "read_messages":
+                    console.log("read_messages")
                 case "last_50_messages":
                     setMessageHistory(data.messages);
                     setHasMoreMessages(data.has_more);
@@ -241,7 +243,8 @@ export const ChatComponent = () => {
                     overflow: 'auto',
                     border: '1px solid #C0C0C0',
                     backgroundColor: '#e3e3e3',
-                    borderRadius: "30px"
+                    borderRadius: "30px",
+                    backgroundImage: 'url("https://img.freepik.com/premium-vector/social-networks-dating-apps-vector-seamless-pattern_341076-469.jpg?size=626&ext=jpg&ga=GA1.1.1797623307.1703658064&semt=ais")'
                     // display: loading ? "none" : 'block'
                 }}>
                     <ul className="m-b-0">
@@ -250,10 +253,6 @@ export const ChatComponent = () => {
                                 <div>
                                     <div style={{ padding: "5px 20px", wordBreak: "break-word", backgroundColor: message.from_user.username === user.username ? "rgb(133 196 235)" : "#f3f3f3" }} className={message.from_user.username === user.username ? "message other-message float-right" : "message my-message"}>
                                         {message.content == "" ?
-
-                                            // <a href={'http://127.0.0.1:8000'+message.file} target="_blank" rel="noopener noreferrer">
-                                            //     View Document
-                                            // </a>
                                             <img style={{ height: "150px" }} src={'http://127.0.0.1:8000' + message.file} />
                                             :
                                             message.content}
@@ -274,7 +273,7 @@ export const ChatComponent = () => {
                 </div>
 
 
-                <div className="input-group mb-0">
+                <div className="input-group mb-0" style={{flexWrap:"unset"}}>
                     <InputEmoji
                         cleanOnEnter
                         onChange={setMessage}
@@ -293,30 +292,33 @@ export const ChatComponent = () => {
                         accept="image/png, image/jpeg"
                     />
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
-                        <span
-                            className="input-group-text rounded-circle"
-                            style={{
-                                backgroundColor: "white",
-                                marginTop: '6px',
-                                cursor: 'pointer',
-                                border: 'none',
-                            }}
+
+                        <span style={{
+                            backgroundColor: "white",
+                            padding: "5px",
+                            marginTop: '10px',
+                            cursor: 'pointer',
+                            border: 'none',
+                        }}
                             onClick={() => {
                                 fileInputRef.current.click();
-                            }}
-                        >
-                            <i className="fa fa-paperclip" style={{ color: '#555' }}></i> {/* Adjust the color of the paperclip icon */}
+                            }} class="material-symbols-outlined">
+                            attachment
                         </span>
                     </div>
 
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
-                        <span
+                        <span style={{ marginTop: '10px', cursor: 'pointer', padding: "5px" }}
+                            onClick={() => { handleSubmit() }} class="material-symbols-outlined">
+                            send
+                        </span>
+                        {/* <span
                             className="input-group-text rounded-circle"  // Add the rounded-circle class
                             style={{ backgroundColor: "rgb(87 145 255)", marginTop: '6px', cursor: 'pointer' }}
                             onClick={() => { handleSubmit() }}
                         >
                             <i className="fa fa-send"></i>
-                        </span>
+                        </span> */}
                     </div>
                 </div>
             </div>

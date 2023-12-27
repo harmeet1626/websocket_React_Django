@@ -13,7 +13,9 @@ export const GroupChat = () => {
     const [user, setUser] = useState(() => AuthService.getCurrentUser())
     const reverced_messageHistory = [...messageHistory].reverse()
     const containerRef = useRef(null);
-    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://${apiUrl}groupChat/${params.groupName}/` : null, {
+    const fileInputRef = useRef(null);
+    const group_name = params.groupName
+    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://${apiUrl}groupChat/${group_name}/` : null, {
         queryParams: {
             token: user ? user.token : "",
         },
@@ -37,6 +39,7 @@ export const GroupChat = () => {
                     break;
                 case "chat_message_echo":
                     console.log(data, 'event is wotking for message')
+                    setMessageHistory(data.message)
                     // setMessageHistory((prev) => [data.message, ...prev]);
                     // sendJsonMessage({ type: "read_messages" });
                     break;
@@ -46,6 +49,7 @@ export const GroupChat = () => {
                     // setHasMoreMessages(data.has_more);
                     break;
                 case "user_join":
+                    console.log('user join')
                     // setParticipants((pcpts) => {
                     //     if (!pcpts.includes(data.user)) {
                     //         return [...pcpts, data.user];
@@ -106,6 +110,37 @@ export const GroupChat = () => {
             behavior: 'instant',
         })
     };
+    const handleFileChange = (e) => {
+        const selectedFile = e.target.files[0];
+
+        if (selectedFile) {
+            uploadDocument(selectedFile)
+        }
+    };
+    async function uploadDocument(fileName) {
+        const apiEndpoint = `http://${apiUrl}documentUpload/`;
+
+        const form_Data = new FormData()
+        form_Data.append("image", fileName)
+
+        await fetch(apiEndpoint, {
+            method: 'PUT',
+            body: form_Data
+
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data, "file uploaded")
+                let file_url = data.response[0].file.file
+                sendJsonMessage({
+                    type: "group_file",
+                    file_url
+                })
+            })
+            .catch(error => {
+                console.error('API Error:', error);
+            });
+    }
     return (
         <>
             <div className="chat" >
@@ -117,8 +152,8 @@ export const GroupChat = () => {
                             <div className="chat-about" style={{ display: "flex" }}>
                                 <Avatar
                                     name={params.groupName}
-                                    round={true} 
-                                    size="30"   
+                                    round={true}
+                                    size="30"
                                 />&nbsp;&nbsp;
                                 <h6 style={{ padding: "5px", textTransform: 'uppercase' }} className="m-b-0">{params.groupName}</h6>
                             </div>
@@ -163,7 +198,7 @@ export const GroupChat = () => {
                 </div>
 
 
-                <div className="input-group mb-0">
+                <div className="input-group mb-0" style={{ flexWrap: "unset" }}>
                     <InputEmoji
                         cleanOnEnter
                         onChange={setMessage}
@@ -176,9 +211,9 @@ export const GroupChat = () => {
                     />
                     <input
                         type="file"
-                        // ref={fileInputRef}
+                        ref={fileInputRef}
                         style={{ display: 'none' }}
-                        // onChange={handleFileChange}
+                        onChange={handleFileChange}
                         accept="image/png, image/jpeg"
                     />
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
@@ -190,9 +225,9 @@ export const GroupChat = () => {
                                 cursor: 'pointer',
                                 border: 'none',
                             }}
-                        // onClick={() => {
-                        //     fileInputRef.current.click();
-                        // }}
+                            onClick={() => {
+                                fileInputRef.current.click();
+                            }}
                         >
                             <i className="fa fa-paperclip" style={{ color: '#555' }}></i>
                         </span>
@@ -200,7 +235,7 @@ export const GroupChat = () => {
 
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
                         <span
-                            className="input-group-text rounded-circle"  
+                            className="input-group-text rounded-circle"
                             style={{ backgroundColor: "rgb(87 145 255)", marginTop: '6px', cursor: 'pointer' }}
                             onClick={() => { handleSubmit() }}
                         >

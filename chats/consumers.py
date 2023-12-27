@@ -138,7 +138,7 @@ class ChatConsumer(JsonWebsocketConsumer):
                 conversation=self.conversation
             )
             channel_layer = get_channel_layer()
-            
+
             async_to_sync(channel_layer.group_send)(
                 self.conversation_name,
                 {
@@ -179,10 +179,12 @@ class ChatConsumer(JsonWebsocketConsumer):
             messages_to_me = self.conversation.messages.filter(
                 to_user=self.user)
             messages_to_me.update(read=True)
+            
 
             # Update the unread message count
             unread_count = Message.objects.filter(
                 to_user=self.user, read=False).count()
+            
             async_to_sync(self.channel_layer.group_send)(
                 self.user.username + "__notifications",
                 {
@@ -190,6 +192,15 @@ class ChatConsumer(JsonWebsocketConsumer):
                     "unread_count": unread_count,
                 },
             )
+            message = Message.objects.filter().all
+            # async_to_sync(self.channel_layer.group_send)(
+            #     self.conversation_name,
+            #     {
+            #         "type": "chat_message_echo",
+            #         "name": self.user.username,
+            #         "message": MessageSerializer(message).data,
+            #     },
+            # )
 
         return super().receive_json(content, **kwargs)
     
@@ -276,8 +287,35 @@ class GroupChat(JsonWebsocketConsumer):
         print("Connected!")
         self.room_name = "home"
         self.accept()
+
         self.group_name = f"{self.scope['url_route']['kwargs']['group_name']}"
+
+        # self.group, created = Conversation.objects.get_or_create(name=self.conversation_name)
         self.group = Groups.objects.filter(name = self.group_name ).values()
+
+        async_to_sync(self.channel_layer.group_add)(
+            self.group_name,
+            self.channel_name,
+        )
+
+
+        # self.send_json(
+        #     {
+        #         "type": "online_user_list",
+        #         "users": [user.username for user in self.group.online.all()],
+        #     }
+        # )
+
+        # async_to_sync(self.channel_layer.group_send)(
+        #     self.group_name,
+        #     {
+        #         "type": "user_join",
+        #         "user": self.user.username,
+        #     },
+        # )
+
+        # self.conversation.online.add(self.user)
+
         messages = Group_content.objects.filter(group_id = self.group[0]['id']).order_by( "-timestamp").values()
         self.send_json(
             {
@@ -287,6 +325,17 @@ class GroupChat(JsonWebsocketConsumer):
             }
         )
 
+    def disconnect(self, code):
+        if self.user.is_authenticated:  # send the leave event to the room
+            async_to_sync(self.channel_layer.group_send)(
+                self.group_name,
+                {
+                    "type": "user_leave",
+                    "user": self.user.username,
+                },
+            )
+            # self.conversation.online.remove(self.user)
+        return super().disconnect(code)
 
 
 
@@ -294,6 +343,8 @@ class GroupChat(JsonWebsocketConsumer):
 
 
 
+    def chat_message_echo(self, event):
+        self.send_json(event)
     def receive_json(self, content, **kwargs ):
         message_type = content["type"]       
 
@@ -312,6 +363,28 @@ class GroupChat(JsonWebsocketConsumer):
             messages = Group_content.objects.filter(group_id = self.group[0]['id']).order_by( "-timestamp").values()
 
 
+            async_to_sync(self.channel_layer.group_send)(
+                self.group_name,
+                {
+                    "type": "chat_message_echo",
+                    "name": self.user.username,
+                    "message": Group_content_serializer(messages, many=True).data,
+                },
+            )
+
+
+        if message_type == "group_file":        
+            content = content.get('file_url', '')
+            group_id = self.group[0]['id']
+            user_id = self.user.id
+            group_instance = Groups.objects.get(id = group_id)
+            messageSerializer = Group_content.objects.create(
+                group = group_instance,
+                from_user=self.user,
+                file=content,
+            )
+            messages = Group_content.objects.filter(group_id = self.group[0]['id']).order_by( "-timestamp").values()
+
 
             async_to_sync(self.channel_layer.group_send)(
                 self.group_name,
@@ -323,50 +396,7 @@ class GroupChat(JsonWebsocketConsumer):
             )
 
 
-            # self.send(text_data=json.dumps({
-            #     "type": "chat_message_echo",
-            # 'message': 'Your message was received on the server.'
-            # }))
-
-            
-
-
-
-        if message_type == "group_file":
-        
-            file_content = content.get('file_url', '')
-            message = Message.objects.create(
-                from_user=self.user,
-                to_user=self.get_receiver(),
-                content="",
-                conversation=self.conversation,
-                file=file_content
-            )
-
-            async_to_sync(self.channel_layer.group_send)(
-                self.conversation_name,
-                {
-                    "type": "chat_message_echo",
-                    "name": self.user.username,
-                    "message": MessageSerializer(message).data,
-                },
-            )
-
-            notification_group_name = self.get_receiver().username + "__notifications"
-            async_to_sync(self.channel_layer.group_send)(
-                notification_group_name,
-                {
-                    "type": "new_message_notification",
-                    "name": self.user.username,
-                    "message": MessageSerializer(message).data,
-                },
-            )
-   
-       
-               
-
-
-
+           
 
         if message_type == "group_typing":
             async_to_sync(self.channel_layer.group_send)(
