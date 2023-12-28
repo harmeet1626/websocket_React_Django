@@ -4,6 +4,15 @@ import Avatar from 'react-avatar';
 import AuthService from '../auth/AuthService';
 import InputEmoji from 'react-input-emoji'
 import useWebSocket, { ReadyState } from "react-use-websocket";
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
+import ListGroup from 'react-bootstrap/ListGroup';
+import Tab from 'react-bootstrap/Tab';
+import Tabs from 'react-bootstrap/Tabs';
+import Accordion from 'react-bootstrap/Accordion';
+
+
+
 
 export const GroupChat = () => {
     const params = useParams()
@@ -14,8 +23,8 @@ export const GroupChat = () => {
     const reverced_messageHistory = [...messageHistory].reverse()
     const containerRef = useRef(null);
     const fileInputRef = useRef(null);
-    const group_name = params.groupName
-    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://${apiUrl}groupChat/${group_name}/` : null, {
+    const [participants, setParticipants] = useState([])
+    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://${apiUrl}groupChat/${params.groupName}/` : null, {
         queryParams: {
             token: user ? user.token : "",
         },
@@ -114,6 +123,17 @@ export const GroupChat = () => {
             uploadDocument(selectedFile)
         }
     };
+    async function fetchParticipants() {
+        const res = await fetch(`http://${apiUrl}GetGroupParticipants/${params.groupName}`, {
+            method: "GET",
+        });
+        const data = await res.json();
+        setParticipants(data)
+
+    }
+    useEffect(() => {
+        fetchParticipants()
+    }, [params.groupName])
     async function uploadDocument(fileName) {
         const apiEndpoint = `http://${apiUrl}documentUpload/`;
 
@@ -137,9 +157,99 @@ export const GroupChat = () => {
                 console.error('API Error:', error);
             });
     }
+    const [show, setShow] = useState(false);
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
+    function test() {
+        console.log(participants)
+    }
     return (
         <>
             <div className="chat" >
+                {/* <Button onClick={() => test()}>test</Button> */}
+
+                <Modal show={show} onHide={handleClose} animation={false}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>{params.groupName}</Modal.Title>
+                    </Modal.Header>
+
+                    <Tabs
+                        defaultActiveKey="profile"
+                        id="uncontrolled-tab-example"
+                        className="mb-3"
+                    >
+                        <Tab eventKey="Participants" title="Participants">
+                            <Modal.Body>Members</Modal.Body>
+
+                            <ListGroup>
+                                {participants.map((u) => (
+                                    <div>
+                                        <ListGroup.Item style={{ textTransform: 'uppercase' }} key={u.username} className="d-flex justify-content-between align-items-center">
+                                            <span>{u.username} {u.username === user.username ? "(You)" : null}</span>
+                                            {u.username !== user.username && (
+                                                <span
+                                                    style={{
+                                                        cursor: 'pointer',
+                                                        backgroundColor: '#ff5555',
+                                                        borderRadius: '5px',
+                                                        color: 'white'
+                                                    }}
+                                                    className="material-symbols-outlined"
+                                                >
+                                                    close
+                                                </span>
+                                            )}
+                                        </ListGroup.Item>
+                                    </div>
+                                ))}
+                            </ListGroup>
+                        </Tab>
+                        <Tab eventKey="profile" title="About">
+                            <Accordion defaultActiveKey="0">
+                                <Accordion.Item eventKey="0">
+                                    <Accordion.Header>About Group</Accordion.Header>
+                                    <Accordion.Body>
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                                        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+                                        minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                                        aliquip ex ea commodo consequat. Duis aute irure dolor in
+                                        reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                                        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+                                        culpa qui officia deserunt mollit anim id est laborum.
+                                    </Accordion.Body>
+                                </Accordion.Item>
+                                <Accordion.Item eventKey="1">
+                                    <Accordion.Header>Created By</Accordion.Header>
+                                    <Accordion.Body>
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                                        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+                                        minim veniam, quis nostrud exercitation ullamco laboris nisi ut
+                                        aliquip ex ea commodo consequat. Duis aute irure dolor in
+                                        reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
+                                        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
+                                        culpa qui officia deserunt mollit anim id est laborum.
+                                    </Accordion.Body>
+                                </Accordion.Item>
+
+                            </Accordion>
+                        </Tab>
+                        <Tab eventKey="media" title="media">
+                            No media shared
+                        </Tab>
+                        <Tab eventKey="Settings" title="Settings">
+                            Tab content for Contact
+                        </Tab>
+                    </Tabs>
+
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={handleClose}>
+                            Close
+                        </Button>
+                        <Button variant="danger" onClick={handleClose}>
+                            Leave Group
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
                 <div className="chat-header clearfix" style={{ backgroundColor: "whitesmoke", height: '65px' }}>
                     <div className="row">
                         <div className="col-lg-6">
@@ -153,6 +263,9 @@ export const GroupChat = () => {
                                 />&nbsp;&nbsp;
                                 <h6 style={{ padding: "5px", textTransform: 'uppercase' }} className="m-b-0">{params.groupName}</h6>
                             </div>
+                            <span style={{ padding: "3px", cursor: "pointer" }} onClick={handleShow} class="material-symbols-outlined">
+                                list
+                            </span>
                         </div>
                     </div>
                 </div>

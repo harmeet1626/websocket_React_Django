@@ -7,7 +7,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Form from 'react-bootstrap/Form';
-
+import InputEmoji from 'react-input-emoji'
 
 export const Conversation = () => {
     const [user, setUser] = useState(() => AuthService.getCurrentUser())
@@ -104,6 +104,7 @@ export const Conversation = () => {
         });
         const data = await res.json();
         fetchGroups()
+        handleClose()
     }
     const handleSearch = (e) => {
         setSearchTerm(e.target.value);
@@ -132,24 +133,18 @@ export const Conversation = () => {
                     <Modal.Header closeButton>
                         <Modal.Title>Create Group</Modal.Title>
                     </Modal.Header>
-                    <Modal.Body>
-                        Please enter the group name
-                    </Modal.Body>
-
-
                     <InputGroup size="sm" className="mb-3">
-                        <InputGroup.Text id="inputGroup-sizing-sm">Group Name :- </InputGroup.Text>
-                        <Form.Control
-                            onChange={(e) => setGroupNameInput(e.target.value)}
-                            aria-label="Small"
-                            aria-describedby="inputGroup-sizing-sm"
+                        <InputEmoji
+                            cleanOnEnter
+                            onChange={setGroupNameInput}
+                            type="text"
+                            className="form-control"
+                            placeholder="Enter Group Name"
+                            style={{ backgroundColor: 'white' }}
                         />
                     </InputGroup>
-
-
-
                     <Form style={{ padding: "10px" }}>
-                        <p>Select participants:-</p>
+                        <p>Participants</p>
                         {users
                             .filter((u) => u.username !== user?.username)
                             .map((u) => (
@@ -178,9 +173,9 @@ export const Conversation = () => {
                         <div>
                             <div className="input-group" style={{ flexWrap: 'inherit' }}>
 
-                                <span style={{ marginTop: '5px' }} class="material-symbols-outlined">
+                                {/* <span style={{ marginTop: '5px' }} class="material-symbols-outlined">
                                     search
-                                </span>
+                                </span> */}
 
                                 <input style={inputStyle} placeholder='search user' value={searchTerm}
                                     onChange={handleSearch} />
