@@ -11,6 +11,9 @@ class Conversation(models.Model):
     name = models.CharField(max_length=128)
     online = models.ManyToManyField(to=User, blank=True)
 
+    class Meta:
+        db_table = 'Conversation'
+
     def get_online_count(self):
         return self.online.count()
 
@@ -38,6 +41,9 @@ class Message(models.Model):
     file = models.FileField(upload_to='static/file', null=True, blank=True)
     decode_key = models.BinaryField(max_length=10000, blank=True)
 
+    class Meta:
+        db_table = 'Message'
+
 
     def save(self, *args, **kwargs):
         # Encrypt the content before saving
@@ -49,22 +55,33 @@ class Message(models.Model):
         super().save(*args, **kwargs)
     
 
-    def __str__(self):
-        return f"From {self.from_user.username} to {self.to_user.username}: {self.content} [{self.timestamp}]"
+    # def __str__(self):
+    #     return f"From {self.from_user.username} to {self.to_user.username}: {self.content} [{self.timestamp}]"
 
 
 class Media(models.Model):    
     file = models.FileField(upload_to='static/file', null=True, blank=True)
+
+    class Meta:
+        db_table = 'Media'
 
 
 
 class Groups(models.Model):
     name = models.CharField(max_length=500)
 
+    class Meta:
+        db_table = 'Groups'
+
 
 class Participants(models.Model):
     group = models.ForeignKey(Groups, on_delete = models.CASCADE)
     user = models.ForeignKey(User, on_delete = models.CASCADE)
+    class Meta:
+        db_table = 'Participants'
+
+
+
 
 class Group_content(models.Model):
     group = models.ForeignKey(Groups, on_delete = models.CASCADE)
@@ -72,3 +89,6 @@ class Group_content(models.Model):
     from_user = models.ForeignKey(User, on_delete = models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
     file = models.FileField(upload_to='static/file', null=True, blank=True)
+
+    class Meta:
+        db_table = 'Group_content'

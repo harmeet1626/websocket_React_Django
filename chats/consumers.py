@@ -38,12 +38,9 @@ class ChatConsumer(JsonWebsocketConsumer):
         print("Connected!")
         self.room_name = "home"
         self.accept()
-
         self.conversation_name = f"{self.scope['url_route']['kwargs']['conversation_name']}"
-
         self.conversation, created = Conversation.objects.get_or_create(
             name=self.conversation_name)
-
         async_to_sync(self.channel_layer.group_add)(
             self.conversation_name,
             self.channel_name,
@@ -192,11 +189,12 @@ class ChatConsumer(JsonWebsocketConsumer):
                     "unread_count": unread_count,
                 },
             )
-            message = Message.objects.filter().all
+            # message = Message.objects.filter().all().values()
+            # print(message)
             # async_to_sync(self.channel_layer.group_send)(
             #     self.conversation_name,
             #     {
-            #         "type": "chat_message_echo",
+            #         "type": "read_messages",
             #         "name": self.user.username,
             #         "message": MessageSerializer(message).data,
             #     },
@@ -248,8 +246,6 @@ class NotificationConsumer(JsonWebsocketConsumer):
                 "unread_count": unread_count,
             }
         )
-
-        # private notification group
         self.notification_group_name = self.user.username + "__notifications"
         async_to_sync(self.channel_layer.group_add)(
             self.notification_group_name,
@@ -287,10 +283,7 @@ class GroupChat(JsonWebsocketConsumer):
         print("Connected!")
         self.room_name = "home"
         self.accept()
-
         self.group_name = f"{self.scope['url_route']['kwargs']['group_name']}"
-
-        # self.group, created = Conversation.objects.get_or_create(name=self.conversation_name)
         self.group = Groups.objects.filter(name = self.group_name ).values()
 
         async_to_sync(self.channel_layer.group_add)(
@@ -298,23 +291,6 @@ class GroupChat(JsonWebsocketConsumer):
             self.channel_name,
         )
 
-
-        # self.send_json(
-        #     {
-        #         "type": "online_user_list",
-        #         "users": [user.username for user in self.group.online.all()],
-        #     }
-        # )
-
-        # async_to_sync(self.channel_layer.group_send)(
-        #     self.group_name,
-        #     {
-        #         "type": "user_join",
-        #         "user": self.user.username,
-        #     },
-        # )
-
-        # self.conversation.online.add(self.user)
 
         messages = Group_content.objects.filter(group_id = self.group[0]['id']).order_by( "-timestamp").values()
         self.send_json(
@@ -334,14 +310,8 @@ class GroupChat(JsonWebsocketConsumer):
                     "user": self.user.username,
                 },
             )
-            # self.conversation.online.remove(self.user)
         return super().disconnect(code)
-
-
-
-
-
-
+    
 
     def chat_message_echo(self, event):
         self.send_json(event)
@@ -349,10 +319,8 @@ class GroupChat(JsonWebsocketConsumer):
         message_type = content["type"]       
 
         if message_type == "group_chat_message":
-
             content=content["message"]
             group_id = self.group[0]['id']
-            user_id = self.user.id
             group_instance = Groups.objects.get(id = group_id)
             messageSerializer = Group_content.objects.create(
                 group = group_instance,

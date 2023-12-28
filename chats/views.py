@@ -1,7 +1,7 @@
 from chats.seriailizers import UserSerializer
 from chats.seriailizers import ConversationSerializer
 from chats.models import Conversation, Message, Participants, Groups, Group_content
-from chats.seriailizers import MessageSerializer, CreateUserSerializer, UploadDocumentsSerializer, participantSerializer, Group_content_serializer, Groups_serializers
+from chats.seriailizers import MessageSerializer, CreateUserSerializer, UploadDocumentsSerializer, ParticipantSerializer, Group_content_serializer, Groups_serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
@@ -131,11 +131,16 @@ class CreateGroup(CreateAPIView):
             user = User.objects.get(username=username)
             Participants.objects.create(group=group, user=user)
 
-    # def perform_create(self, serializer):
-    #     participants_data = self.request.data.pop('participants', [])
-    #     group = serializer.save()
 
-    #     for participant_data in participants_data:
-    #         Participants.objects.create(group=group, **participant_data)
-
+class GetGroupParticipants(ListAPIView):
+    queryset = Participants.objects.all()
+    serializer_class = ParticipantSerializer
+    def get_queryset(self):
+        print("working!")
+        queryset = super().get_queryset()
+        group_name = self.kwargs.get('group_name')
+        print(group_name)
+        if group_name:
+            queryset = queryset.filter(group__name=group_name)
+        return queryset
 

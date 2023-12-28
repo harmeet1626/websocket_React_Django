@@ -1,7 +1,6 @@
 from chats.models import Conversation
 from rest_framework import serializers
 from cryptography.fernet import Fernet
-import base64
 from rest_framework.response import Response
 from chats.models import Message, Media, Participants, Group_content, Groups
 from django.contrib.auth.models import User
@@ -20,6 +19,7 @@ class UploadDocumentsSerializer(serializers.ModelSerializer):
         model = Media
         fields = ["file"]
        
+
 
 
 class MessageSerializer(serializers.ModelSerializer):
@@ -58,7 +58,6 @@ class MessageSerializer(serializers.ModelSerializer):
 
 
 
-
 class BinaryDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
@@ -91,15 +90,38 @@ class ConversationSerializer(serializers.ModelSerializer):
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
+    # profile = UserProfileSerializer(write_only=True)
+
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'password']  # Add other fields as needed
 
 
-class participantSerializer(serializers.ModelSerializer):
+class ParticipantSerializer(serializers.ModelSerializer):
+    username = serializers.SerializerMethodField()
+    group_name = serializers.SerializerMethodField()
     class Meta:
         model = Participants
-        fields = '__all__'
+        fields = ['group', 'user', 'username', 'group_name']
+
+    def get_username(self, instance):
+        user_instance = instance.user
+        username = user_instance.username
+        return username
+    
+    def get_group_name(self, instance):
+        group_instance = instance.group
+        group_name = group_instance.name 
+        return group_name
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        if 'user' in representation:
+            representation.pop('user')
+        # if 'group' in representation:
+        #     representation.pop('group')
+        return representation
+
 
 
 
@@ -116,6 +138,7 @@ class Group_content_serializer(serializers.ModelSerializer):
         user = User.objects.get(id=user_id)
         username = user.username
         return username
+    
     def get_file(self, obj):
         return obj['file']
     
@@ -125,5 +148,6 @@ class Groups_serializers(serializers.ModelSerializer):
         model = Groups
         # fields = ['name']
         fields = "__all__"
+    
 
 
