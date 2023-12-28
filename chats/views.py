@@ -119,17 +119,39 @@ class User_group(ListAPIView):
 
 
 
+# class CreateGroup(CreateAPIView):
+#     queryset = Groups.objects.all()
+#     serializer_class = Groups_serializers
+
+#     def perform_create(self, serializer):
+#         username_list = self.request.data.get('usernames', [])
+#         group = serializer.save()
+
+#         for username in username_list:
+#             user = User.objects.get(username=username)
+#             Participants.objects.create(group=group, user=user)
+    
 class CreateGroup(CreateAPIView):
     queryset = Groups.objects.all()
     serializer_class = Groups_serializers
 
     def perform_create(self, serializer):
+        group_name = self.request.data.get('group_name', None)
+        if group_name is not None:
+            existing_group = Groups.objects.filter(group_name=group_name).first()
+
+            if existing_group:
+                # Group with the same name already exists
+                response_data = {'detail': f'A group with the name "{group_name}" already exists.'}
+                return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
         username_list = self.request.data.get('usernames', [])
         group = serializer.save()
 
         for username in username_list:
             user = User.objects.get(username=username)
             Participants.objects.create(group=group, user=user)
+
 
 
 class GetGroupParticipants(ListAPIView):
@@ -139,8 +161,24 @@ class GetGroupParticipants(ListAPIView):
         print("working!")
         queryset = super().get_queryset()
         group_name = self.kwargs.get('group_name')
-        print(group_name)
         if group_name:
             queryset = queryset.filter(group__name=group_name)
         return queryset
 
+class RemoveUserFromGroup(UpdateAPIView):
+    queryset = Participants.objects.all()
+    def put(self, request, *args, **kwargs):
+        user = request.data.get('user')
+        group = request.data.get('group')
+        queryset = Participants.objects.filter(user=user, group=group)
+        queryset.delete()
+        return Response("User removed from group")
+    
+class AddParticipantInGroup(CreateAPIView):
+    queryset = Participants.objects.all()
+    def create(self, request, *args, **kwargs):
+        user_instance = User.objects.get(username = request.data.get('user'))
+        group_instance = Groups.objects.get(name = request.data.get('group'))
+        queryset = Participants.objects.create(user = user_instance, group = group_instance)
+        queryset.save()
+        return Response("User added successfully")

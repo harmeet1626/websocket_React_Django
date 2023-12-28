@@ -35,19 +35,19 @@ export const Conversation = () => {
     useEffect(() => {
         fetchGroups();
     }, [user])
-    useEffect(() => {
-        async function fetchUsers() {
-            if (!user?.username) {
-                navigate('/login')
-            }
-            const res = await fetch(`http://${apiUrl}users/`, {
-                headers: {
-                    Authorization: `Token ${user?.token}`
-                }
-            });
-            const data = await res.json();
-            setUsers(data);
+    async function fetchUsers() {
+        if (!user?.username) {
+            navigate('/login')
         }
+        const res = await fetch(`http://${apiUrl}users/`, {
+            headers: {
+                Authorization: `Token ${user?.token}`
+            }
+        });
+        const data = await res.json();
+        setUsers(data);
+    }
+    useEffect(() => {
         fetchUsers();
     }, []);
 

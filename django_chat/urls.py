@@ -1,7 +1,7 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path,include
 from chats.views import CustomObtainAuthTokenView
-from chats.views import ConversationViewSet, MessageViewSet,UserViewSet, CreateUserView,UploadDocument, User_group, CreateGroup, GetGroupParticipants
+from chats.views import ConversationViewSet, MessageViewSet,UserViewSet
 from rest_framework.routers import DefaultRouter
 
 
@@ -13,9 +13,5 @@ router.register("messages", MessageViewSet)
 urlpatterns = router.urls + [
     path('admin/', admin.site.urls),
     path("auth-token/", CustomObtainAuthTokenView.as_view()),
-    path('create-user/', CreateUserView.as_view(), name='create-user'),
-    path('documentUpload/',UploadDocument.as_view(), name='documentUpload'),
-    path('UserGroup/',User_group.as_view(), name='User_group'),
-    path('CreateGroup/',CreateGroup.as_view(), name='CreateGroup'),
-    path('GetGroupParticipants/<str:group_name>/',GetGroupParticipants.as_view(), name='GetGroupParticipants'),
+    path('', include('chats.urls')),
 ]

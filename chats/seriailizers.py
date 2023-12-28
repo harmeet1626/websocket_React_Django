@@ -116,8 +116,8 @@ class ParticipantSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        if 'user' in representation:
-            representation.pop('user')
+        # if 'user' in representation:
+        #     representation.pop('user')
         # if 'group' in representation:
         #     representation.pop('group')
         return representation

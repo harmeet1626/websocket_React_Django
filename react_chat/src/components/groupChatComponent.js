@@ -10,7 +10,7 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Accordion from 'react-bootstrap/Accordion';
-
+import Form from 'react-bootstrap/Form';
 
 
 
@@ -24,6 +24,7 @@ export const GroupChat = () => {
     const containerRef = useRef(null);
     const fileInputRef = useRef(null);
     const [participants, setParticipants] = useState([])
+    const [users, setUsers] = useState()
     const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://${apiUrl}groupChat/${params.groupName}/` : null, {
         queryParams: {
             token: user ? user.token : "",
@@ -105,6 +106,7 @@ export const GroupChat = () => {
     };
     useEffect(() => {
         scrollToBottom()
+        fetchUsers()
     }, [])
     useEffect(() => {
         scrollToBottom();
@@ -134,6 +136,18 @@ export const GroupChat = () => {
     useEffect(() => {
         fetchParticipants()
     }, [params.groupName])
+
+
+    async function fetchUsers() {
+        const res = await fetch(`http://${apiUrl}users/`, {
+            headers: {
+                Authorization: `Token ${user?.token}`
+            }
+        });
+        const data = await res.json();
+        setUsers(data);
+    }
+
     async function uploadDocument(fileName) {
         const apiEndpoint = `http://${apiUrl}documentUpload/`;
 
@@ -160,14 +174,67 @@ export const GroupChat = () => {
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
-    function test() {
-        console.log(participants)
+    async function removeFromGroup(event) {
+        const apiEndpoint = `http://${apiUrl}RemoveUserFromGroup/`;
+        const requestOptions = {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user: event.user,
+                group: event.group,
+            }),
+        };
+
+        await fetch(apiEndpoint, requestOptions)
+            .then(response => response.json())
+            .then(data => {
+                fetchParticipants()
+
+            })
+            .catch(error => {
+                console.error('API Error:', error);
+            });
+
     }
+
+    async function addUserToGroup(event) {
+
+        let user = event.username
+        const apiEndpoint = `http://${apiUrl}AddParticipantInGroup/`;
+        const requestOptions = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user: user,
+                group: params.groupName,
+            }),
+        };
+
+        await fetch(apiEndpoint, requestOptions)
+            .then(response => response.json())
+            .then(data => {
+                fetchParticipants()
+
+            })
+            .catch(error => {
+                console.error('API Error:', error);
+            });
+    }
+    const [checkedUsers, setCheckedUsers] = useState([user.username]);
+    const handleCheckboxChange = (username) => {
+        setCheckedUsers((prevCheckedUsers) =>
+            prevCheckedUsers.includes(username)
+                ? prevCheckedUsers.filter((u) => u !== username)
+                : [...prevCheckedUsers, username]
+        );
+    };
     return (
         <>
             <div className="chat" >
-                {/* <Button onClick={() => test()}>test</Button> */}
-
                 <Modal show={show} onHide={handleClose} animation={false}>
                     <Modal.Header closeButton>
                         <Modal.Title>{params.groupName}</Modal.Title>
@@ -179,30 +246,61 @@ export const GroupChat = () => {
                         className="mb-3"
                     >
                         <Tab eventKey="Participants" title="Participants">
-                            <Modal.Body>Members</Modal.Body>
+                            <Accordion defaultActiveKey="0">
+                                <Accordion.Item eventKey="0">
+                                    <Accordion.Header>Members</Accordion.Header>
+                                    <Accordion.Body>
+                                        <ListGroup>
+                                            {participants.map((u) => (
+                                                <div>
+                                                    <ListGroup.Item style={{ textTransform: 'uppercase' }} key={u.username} className="d-flex justify-content-between align-items-center">
+                                                        <span>{u.username} {u.username === user.username ? "(You)" : null}</span>
+                                                        {u.username !== user.username && (
+                                                            <span
+                                                                onClick={() => removeFromGroup(u)}
+                                                                style={{
+                                                                    cursor: 'pointer',
+                                                                    borderRadius: '5px',
+                                                                }}
+                                                                className="material-symbols-outlined"
+                                                            >
+                                                                close
+                                                            </span>
+                                                        )}
+                                                    </ListGroup.Item>
+                                                </div>
+                                            ))}
+                                        </ListGroup>
+                                    </Accordion.Body>
+                                </Accordion.Item>
+                                <Accordion.Item eventKey="1">
+                                    <Accordion.Header>Add Members</Accordion.Header>
+                                    <Accordion.Body>
+                                        {users && users
+                                            .filter((u) => !participants.some((p) => p.username.includes(u.username)))
+                                            .map((u) => (
+                                                <div>
+                                                    <ListGroup.Item style={{ textTransform: 'uppercase' }} key={u.username} className="d-flex justify-content-between align-items-center">
+                                                        <span>{u.username} {u.username === user.username ? "(You)" : null}</span>
+                                                        {u.username !== user.username && (
+                                                            <span
+                                                                onClick={() => addUserToGroup(u)}
+                                                                style={{
+                                                                    cursor: 'pointer',
+                                                                    borderRadius: '5px',
+                                                                }}
+                                                                className="material-symbols-outlined"
+                                                            >
+                                                                add
+                                                            </span>
+                                                        )}
+                                                    </ListGroup.Item>
+                                                </div>
+                                            ))}
+                                    </Accordion.Body>
+                                </Accordion.Item>
 
-                            <ListGroup>
-                                {participants.map((u) => (
-                                    <div>
-                                        <ListGroup.Item style={{ textTransform: 'uppercase' }} key={u.username} className="d-flex justify-content-between align-items-center">
-                                            <span>{u.username} {u.username === user.username ? "(You)" : null}</span>
-                                            {u.username !== user.username && (
-                                                <span
-                                                    style={{
-                                                        cursor: 'pointer',
-                                                        backgroundColor: '#ff5555',
-                                                        borderRadius: '5px',
-                                                        color: 'white'
-                                                    }}
-                                                    className="material-symbols-outlined"
-                                                >
-                                                    close
-                                                </span>
-                                            )}
-                                        </ListGroup.Item>
-                                    </div>
-                                ))}
-                            </ListGroup>
+                            </Accordion>
                         </Tab>
                         <Tab eventKey="profile" title="About">
                             <Accordion defaultActiveKey="0">
