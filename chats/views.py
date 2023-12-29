@@ -158,7 +158,6 @@ class GetGroupParticipants(ListAPIView):
     queryset = Participants.objects.all()
     serializer_class = ParticipantSerializer
     def get_queryset(self):
-        print("working!")
         queryset = super().get_queryset()
         group_name = self.kwargs.get('group_name')
         if group_name:

@@ -80,7 +80,7 @@ export const Conversation = () => {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
     const [groupNameInput, setGroupNameInput] = useState("")
-    const [checkedUsers, setCheckedUsers] = useState([user.username]);
+    const [checkedUsers, setCheckedUsers] = useState([user?.username]);
     const handleCheckboxChange = (username) => {
         setCheckedUsers((prevCheckedUsers) =>
             prevCheckedUsers.includes(username)

@@ -224,14 +224,6 @@ export const GroupChat = () => {
                 console.error('API Error:', error);
             });
     }
-    const [checkedUsers, setCheckedUsers] = useState([user.username]);
-    const handleCheckboxChange = (username) => {
-        setCheckedUsers((prevCheckedUsers) =>
-            prevCheckedUsers.includes(username)
-                ? prevCheckedUsers.filter((u) => u !== username)
-                : [...prevCheckedUsers, username]
-        );
-    };
     return (
         <>
             <div className="chat" >
@@ -250,10 +242,10 @@ export const GroupChat = () => {
                                 <Accordion.Item eventKey="0">
                                     <Accordion.Header>Members</Accordion.Header>
                                     <Accordion.Body>
-                                        <ListGroup>
+                                        <ListGroup >
                                             {participants.map((u) => (
-                                                <div>
-                                                    <ListGroup.Item style={{ textTransform: 'uppercase' }} key={u.username} className="d-flex justify-content-between align-items-center">
+                                                <div >
+                                                    <ListGroup.Item style={{ textTransform: 'uppercase', }} key={u.username} className="d-flex justify-content-between align-items-center">
                                                         <span>{u.username} {u.username === user.username ? "(You)" : null}</span>
                                                         {u.username !== user.username && (
                                                             <span
@@ -331,9 +323,18 @@ export const GroupChat = () => {
 
                             </Accordion>
                         </Tab>
-                        <Tab eventKey="media" title="media">
-                            No media shared
+                        <Tab eventKey="media" title="media" style={{ padding: "10px" }}>
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(80px, 1fr))", gap: "10px" }}>
+                                {reverced_messageHistory
+                                    .filter((u) => u.file !== "")
+                                    .map((u, index) => (
+                                        <div key={index}>
+                                            <img style={{ height: "50px", width: "80px" }} src={'http://127.0.0.1:8000' + u.file} alt={`Image ${index}`} />
+                                        </div>
+                                    ))}
+                            </div>
                         </Tab>
+
                         <Tab eventKey="Settings" title="Settings">
                             Tab content for Contact
                         </Tab>
@@ -343,9 +344,9 @@ export const GroupChat = () => {
                         <Button variant="secondary" onClick={handleClose}>
                             Close
                         </Button>
-                        <Button variant="danger" onClick={handleClose}>
+                        {/* <Button variant="danger" onClick={handleClose}>
                             Leave Group
-                        </Button>
+                        </Button> */}
                     </Modal.Footer>
                 </Modal>
                 <div className="chat-header clearfix" style={{ backgroundColor: "whitesmoke", height: '65px' }}>
