@@ -11,6 +11,8 @@ import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Accordion from 'react-bootstrap/Accordion';
 import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup';
+
 
 
 
@@ -25,6 +27,10 @@ export const GroupChat = () => {
     const fileInputRef = useRef(null);
     const [participants, setParticipants] = useState([])
     const [users, setUsers] = useState()
+    const [groupAdmin, setGroupAdmin] = useState('')
+    const [createdBy, setCreatedBy] = useState('')
+    const [createdOn, setCreatedOn] = useState('')
+
     const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://${apiUrl}groupChat/${params.groupName}/` : null, {
         queryParams: {
             token: user ? user.token : "",
@@ -130,7 +136,10 @@ export const GroupChat = () => {
             method: "GET",
         });
         const data = await res.json();
-        setParticipants(data)
+        setGroupAdmin(data?.admin)
+        setCreatedOn(data?.created_on)
+        setCreatedBy(data?.Created_by)
+        setParticipants(data?.Participants)
 
     }
     useEffect(() => {
@@ -200,7 +209,6 @@ export const GroupChat = () => {
     }
 
     async function addUserToGroup(event) {
-
         let user = event.username
         const apiEndpoint = `http://${apiUrl}AddParticipantInGroup/`;
         const requestOptions = {
@@ -237,7 +245,7 @@ export const GroupChat = () => {
                         id="uncontrolled-tab-example"
                         className="mb-3"
                     >
-                        <Tab eventKey="Participants" title="Participants">
+                        <Tab eventKey="Participants" title={`Participants (${participants.length})`}>
                             <Accordion defaultActiveKey="0">
                                 <Accordion.Item eventKey="0">
                                     <Accordion.Header>Members</Accordion.Header>
@@ -245,9 +253,16 @@ export const GroupChat = () => {
                                         <ListGroup >
                                             {participants.map((u) => (
                                                 <div >
-                                                    <ListGroup.Item style={{ textTransform: 'uppercase', }} key={u.username} className="d-flex justify-content-between align-items-center">
-                                                        <span>{u.username} {u.username === user.username ? "(You)" : null}</span>
-                                                        {u.username !== user.username && (
+                                                    <ListGroup.Item style={{ textTransform: 'uppercase', }}
+                                                        key={u.username} className="d-flex justify-content-between align-items-center">
+                                                        <span>
+                                                            <span style={{ color: u.username === user.username ? 'green' : 'black', fontSize: u.username === groupAdmin ? 'small' : 'inherit' }}>
+                                                                {u.username}
+                                                                {u.username === groupAdmin && <span style={{ fontSize: 'small' }}> (admin)</span>}
+                                                            </span>
+                                                        </span>
+
+                                                        {u.username !== user.username && groupAdmin == user.username && (
                                                             <span
                                                                 onClick={() => removeFromGroup(u)}
                                                                 style={{
@@ -265,32 +280,35 @@ export const GroupChat = () => {
                                         </ListGroup>
                                     </Accordion.Body>
                                 </Accordion.Item>
-                                <Accordion.Item eventKey="1">
-                                    <Accordion.Header>Add Members</Accordion.Header>
-                                    <Accordion.Body>
-                                        {users && users
-                                            .filter((u) => !participants.some((p) => p.username.includes(u.username)))
-                                            .map((u) => (
-                                                <div>
-                                                    <ListGroup.Item style={{ textTransform: 'uppercase' }} key={u.username} className="d-flex justify-content-between align-items-center">
-                                                        <span>{u.username} {u.username === user.username ? "(You)" : null}</span>
-                                                        {u.username !== user.username && (
-                                                            <span
-                                                                onClick={() => addUserToGroup(u)}
-                                                                style={{
-                                                                    cursor: 'pointer',
-                                                                    borderRadius: '5px',
-                                                                }}
-                                                                className="material-symbols-outlined"
-                                                            >
-                                                                add
-                                                            </span>
-                                                        )}
-                                                    </ListGroup.Item>
-                                                </div>
-                                            ))}
-                                    </Accordion.Body>
-                                </Accordion.Item>
+                                {user.username == groupAdmin ?
+                                    <Accordion.Item eventKey="1">
+                                        <Accordion.Header>Add Members</Accordion.Header>
+                                        <Accordion.Body>
+                                            {users && users
+                                                .filter((u) => !participants.some((p) => p.username.includes(u.username)))
+                                                .map((u) => (
+                                                    <div>
+                                                        <ListGroup.Item style={{ textTransform: 'uppercase' }} key={u.username} className="d-flex justify-content-between align-items-center">
+                                                            <span>{u.username} {u.username === user.username ? "(You)" : null}</span>
+                                                            {u.username !== user.username && (
+                                                                <span
+                                                                    onClick={() => addUserToGroup(u)}
+                                                                    style={{
+                                                                        cursor: 'pointer',
+                                                                        borderRadius: '5px',
+                                                                    }}
+                                                                    className="material-symbols-outlined"
+                                                                >
+                                                                    add
+                                                                </span>
+                                                            )}
+                                                        </ListGroup.Item>
+                                                    </div>
+                                                ))}
+                                        </Accordion.Body>
+                                    </Accordion.Item>
+                                    : ""}
+
 
                             </Accordion>
                         </Tab>
@@ -299,16 +317,31 @@ export const GroupChat = () => {
                                 <Accordion.Item eventKey="0">
                                     <Accordion.Header>About Group</Accordion.Header>
                                     <Accordion.Body>
-                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                                        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-                                        minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                                        aliquip ex ea commodo consequat. Duis aute irure dolor in
-                                        reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-                                        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-                                        culpa qui officia deserunt mollit anim id est laborum.
+                                        <InputGroup className="mb-3">
+                                            <InputGroup.Text id="basic-addon1">Created By</InputGroup.Text>
+                                            <Form.Control
+                                                placeholder="Username"
+                                                aria-label="Username"
+                                                aria-describedby="basic-addon1"
+                                                value={createdBy}
+                                                disabled={true}
+                                            />
+                                        </InputGroup>
+                                        <InputGroup className="mb-3">
+                                            <InputGroup.Text id="basic-addon1">Created On</InputGroup.Text>
+                                            <Form.Control
+                                                placeholder="Username"
+                                                aria-label="Username"
+                                                aria-describedby="basic-addon1"
+                                                value={createdOn}
+                                                disabled={true}
+                                            />
+                                        </InputGroup>
+
+                                        
                                     </Accordion.Body>
                                 </Accordion.Item>
-                                <Accordion.Item eventKey="1">
+                                {/* <Accordion.Item eventKey="1">
                                     <Accordion.Header>Created By</Accordion.Header>
                                     <Accordion.Body>
                                         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
@@ -319,7 +352,7 @@ export const GroupChat = () => {
                                         pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
                                         culpa qui officia deserunt mollit anim id est laborum.
                                     </Accordion.Body>
-                                </Accordion.Item>
+                                </Accordion.Item> */}
 
                             </Accordion>
                         </Tab>

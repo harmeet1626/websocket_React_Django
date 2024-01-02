@@ -69,7 +69,9 @@ class Media(models.Model):
 
 class Groups(models.Model):
     name = models.CharField(max_length=500)
-
+    Created_by = models.CharField(max_length=500,null=True, blank=True)
+    Created_on = models.DateField(max_length=500, null=True, blank=True)
+    Admin = models.ForeignKey(User, on_delete = models.CASCADE, related_name="Admin", null=True, blank=True)
     class Meta:
         db_table = 'Groups'
 
@@ -77,6 +79,7 @@ class Groups(models.Model):
 class Participants(models.Model):
     group = models.ForeignKey(Groups, on_delete = models.CASCADE)
     user = models.ForeignKey(User, on_delete = models.CASCADE)
+    
     class Meta:
         db_table = 'Participants'
 

@@ -4,7 +4,7 @@ from cryptography.fernet import Fernet
 from rest_framework.response import Response
 from chats.models import Message, Media, Participants, Group_content, Groups
 from django.contrib.auth.models import User
-
+from datetime import date
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -100,9 +100,12 @@ class CreateUserSerializer(serializers.ModelSerializer):
 class ParticipantSerializer(serializers.ModelSerializer):
     username = serializers.SerializerMethodField()
     group_name = serializers.SerializerMethodField()
+    group_admin = serializers.SerializerMethodField()
+    # created_by = serializers.SerializerMethodField()
+    # created_on = serializers.SerializerMethodField()
     class Meta:
         model = Participants
-        fields = ['group', 'user', 'username', 'group_name']
+        fields = ['group', 'user', 'username', 'group_name', "group_admin"]
 
     def get_username(self, instance):
         user_instance = instance.user
@@ -113,13 +116,14 @@ class ParticipantSerializer(serializers.ModelSerializer):
         group_instance = instance.group
         group_name = group_instance.name 
         return group_name
+    
+    def get_group_admin(self, instance):
+        groupName = self.get_group_name(instance)
+        admin = Groups.objects.filter(name = groupName).values('Admin_id__username').first()
+        return admin['Admin_id__username']
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        # if 'user' in representation:
-        #     representation.pop('user')
-        # if 'group' in representation:
-        #     representation.pop('group')
         return representation
 
 
@@ -146,8 +150,10 @@ class Group_content_serializer(serializers.ModelSerializer):
 class Groups_serializers(serializers.ModelSerializer):
     class Meta:
         model = Groups
-        # fields = ['name']
-        fields = "__all__"
+        fields = ['name', 'Created_by', 'Created_on', 'Admin']
+
+
+
     
 
 

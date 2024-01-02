@@ -99,7 +99,9 @@ export const Conversation = () => {
             },
             body: JSON.stringify({
                 "name": groupNameInput,
-                "usernames": checkedUsers
+                "usernames": checkedUsers,
+                "Created_by":user?.username,
+
             })
         });
         const data = await res.json();

@@ -101,7 +101,7 @@ function SignUp() {
                                 {/* <MDBIcon fas icon="lock me-3" size='lg' /> */}
                                 <MDBInput value={password_input} onChange={(e) => setPassword_input(e.target.value)} label='Password' id='form3' type='password' />
                             </div>
-                            <div className="d-flex flex-row align-items-center mb-4 ">
+                            {/* <div className="d-flex flex-row align-items-center mb-4 ">
 
                                 <div className="">
                                     <label for="file-input">Choose a profile picture:</label><br></br>
@@ -109,7 +109,7 @@ function SignUp() {
                                         onChange={handleFileChange}
                                         type="file" id="file-input" name="ImageStyle" />
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* <div className="d-flex flex-row align-items-center mb-4">
                                 <MDBIcon fas icon="key me-3" size='lg' />

@@ -14,6 +14,8 @@ from django.contrib.auth.hashers import make_password
 from rest_framework.views import APIView
 from django.shortcuts import redirect
 from django.http import JsonResponse
+from datetime import date
+
 
 
 class CustomObtainAuthTokenView(ObtainAuthToken):
@@ -131,22 +133,26 @@ class User_group(ListAPIView):
 #             user = User.objects.get(username=username)
 #             Participants.objects.create(group=group, user=user)
     
+
 class CreateGroup(CreateAPIView):
     queryset = Groups.objects.all()
     serializer_class = Groups_serializers
 
     def perform_create(self, serializer):
-        group_name = self.request.data.get('group_name', None)
-        if group_name is not None:
-            existing_group = Groups.objects.filter(group_name=group_name).first()
+        group_name = self.request.data.get('name', None)
+        Created_by = self.request.data.get('Created_by', None)
+        admin = User.objects.get(username = Created_by)
 
-            if existing_group:
-                # Group with the same name already exists
+        if group_name is not None:
+            existing_group = Groups.objects.filter(name__iexact=group_name)
+            if existing_group.exists():
                 response_data = {'detail': f'A group with the name "{group_name}" already exists.'}
-                return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+                return response_data
 
         username_list = self.request.data.get('usernames', [])
-        group = serializer.save()
+
+        # Set Created_by and Admin directly in the serializer save method
+        group = serializer.save(Created_by=Created_by, Admin=admin, Created_on = date.today())
 
         for username in username_list:
             user = User.objects.get(username=username)
@@ -154,15 +160,32 @@ class CreateGroup(CreateAPIView):
 
 
 
+
+
+
 class GetGroupParticipants(ListAPIView):
     queryset = Participants.objects.all()
     serializer_class = ParticipantSerializer
+
     def get_queryset(self):
-        queryset = super().get_queryset()
         group_name = self.kwargs.get('group_name')
-        if group_name:
-            queryset = queryset.filter(group__name=group_name)
-        return queryset
+        queryset = Participants.objects.filter(group__name=group_name)
+        admin = Groups.objects.filter(name=group_name).values("Admin_id__username","Created_by","Created_on").first()
+        CreatedBy = admin['Created_by']
+        CreatedOn = admin['Created_on']
+        admin_username = admin['Admin_id__username'] if admin else None
+
+        res = {
+            "admin": admin_username,
+            "Created_by":CreatedBy,
+            "created_on":CreatedOn,
+            'Participants': self.serializer_class(queryset, many=True).data
+        }
+        return queryset, res
+
+    def list(self, request, *args, **kwargs):
+        queryset, res = self.get_queryset()
+        return Response(res)
 
 class RemoveUserFromGroup(UpdateAPIView):
     queryset = Participants.objects.all()
