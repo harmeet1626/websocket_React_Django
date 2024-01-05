@@ -149,7 +149,6 @@ export const GroupChat = () => {
         setCreatedBy(data?.Created_by)
         setParticipants(data?.Participants)
         setGroupImage(`http://` + apiUrl + data.Group_image)
-
     }
 
     async function UpdateGroupAdmin(username) {
@@ -211,6 +210,7 @@ export const GroupChat = () => {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
     async function removeFromGroup(event) {
+        console.log(event, "remove from group")
         const apiEndpoint = `http://${apiUrl}RemoveUserFromGroup/`;
         const requestOptions = {
             method: 'PUT',
@@ -226,8 +226,9 @@ export const GroupChat = () => {
         await fetch(apiEndpoint, requestOptions)
             .then(response => response.json())
             .then(data => {
-                fetchParticipants()
 
+                fetchParticipants()
+                dispatch(fetchGroups(`Token ${user?.token}`))
             })
             .catch(error => {
                 console.error('API Error:', error);
@@ -313,6 +314,7 @@ export const GroupChat = () => {
                                                             {u.username === groupAdmin && <span style={{ fontSize: '10px', color: 'green' }}>&nbsp; admin</span>}
                                                             <span style={{ color: u.username === user.username ? 'green' : 'black', fontSize: u.username === groupAdmin ? 'small' : 'inherit' }}>
                                                                 {user.username === groupAdmin && user.username !== u.username ?
+
                                                                     <Dropdown style={{ border: 'none', marginLeft: '5px' }}>
                                                                         <Dropdown.Toggle
                                                                             id="dropdown-basic-button"
@@ -327,7 +329,9 @@ export const GroupChat = () => {
                                                                         </Dropdown.Toggle>
 
                                                                         <Dropdown.Menu style={{ backgroundColor: 'rgb(227, 227, 227)', border: 'none' }}>
-                                                                            <Dropdown.Item onClick={() => removeFromGroup(u)}>
+                                                                            <Dropdown.Item onClick={() => {
+                                                                                removeFromGroup(u);
+                                                                            }}>
                                                                                 <div className="d-flex align-items-center">
                                                                                     <p style={{ margin: '0' }}>Remove From group</p>
                                                                                     <span
@@ -352,7 +356,44 @@ export const GroupChat = () => {
                                                                             </Dropdown.Item>
                                                                         </Dropdown.Menu>
                                                                     </Dropdown>
-                                                                    : null}
+                                                                    :
+                                                                    u.username == user.username ?
+                                                                        <Dropdown style={{ border: 'none', marginLeft: '5px' }}>
+                                                                            <Dropdown.Toggle
+                                                                                id="dropdown-basic-button"
+                                                                                variant="transparent"
+                                                                                style={{
+                                                                                    padding: '2px',
+                                                                                    border: 'none',
+                                                                                    background: 'none',
+                                                                                    cursor: 'pointer',
+                                                                                }}
+                                                                            >
+                                                                            </Dropdown.Toggle>
+
+                                                                            <Dropdown.Menu style={{ backgroundColor: 'rgb(227, 227, 227)', border: 'none' }}>
+                                                                                <Dropdown.Item disabled={u.username == groupAdmin ? true : false} onClick={() => {
+                                                                                    removeFromGroup(u)
+                                                                                    handleClose()
+                                                                                }}>
+                                                                                    <div className="d-flex align-items-center">
+                                                                                        <p style={{ margin: '0' }}>Leave Group</p>
+                                                                                        <span
+                                                                                            style={{
+                                                                                                cursor: 'pointer',
+                                                                                                borderRadius: '5px',
+                                                                                                marginLeft: '10px', // Adjust margin as needed
+                                                                                            }}
+                                                                                            className="material-symbols-outlined"
+                                                                                        >
+                                                                                            <BsTrash />
+                                                                                        </span>
+                                                                                    </div>
+                                                                                </Dropdown.Item>
+                                                                            </Dropdown.Menu>
+                                                                        </Dropdown> :
+                                                                        null
+                                                                }
                                                             </span>
 
                                                         </span>
@@ -448,6 +489,9 @@ export const GroupChat = () => {
                                                 disabled={true}
                                             />
                                         </InputGroup>
+                                        {user.username !== groupAdmin ?
+                                            <Button variant="danger" onClick={() => removeFromGroup()}>Leave Group</Button> : null
+                                        }
                                     </Accordion.Body>
                                 </Accordion.Item>
                             </Accordion>
