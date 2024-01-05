@@ -6,6 +6,13 @@ User = get_user_model()
 
 
 
+class User_Image(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='user_image')
+    image = models.FileField(upload_to='static/file', null=True, blank=True)
+    class Meta:
+        db_table = 'User_Image'
+
+
 class Conversation(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=128)
@@ -72,6 +79,8 @@ class Groups(models.Model):
     Created_by = models.CharField(max_length=500,null=True, blank=True)
     Created_on = models.DateField(max_length=500, null=True, blank=True)
     Admin = models.ForeignKey(User, on_delete = models.CASCADE, related_name="Admin", null=True, blank=True)
+    image = models.FileField(upload_to='static/file', null=True, blank=True)
+
     class Meta:
         db_table = 'Groups'
 

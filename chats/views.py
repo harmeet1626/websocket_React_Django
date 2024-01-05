@@ -1,6 +1,6 @@
 from chats.seriailizers import UserSerializer
 from chats.seriailizers import ConversationSerializer
-from chats.models import Conversation, Message, Participants, Groups, Group_content
+from chats.models import Conversation, Message, Participants, Groups, Group_content, User_Image
 from chats.seriailizers import MessageSerializer, CreateUserSerializer, UploadDocumentsSerializer, ParticipantSerializer, Group_content_serializer, Groups_serializers
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -11,9 +11,6 @@ from rest_framework.permissions import IsAuthenticated
 from chats.paginators import MessagePagination
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
 from django.contrib.auth.hashers import make_password
-from rest_framework.views import APIView
-from django.shortcuts import redirect
-from django.http import JsonResponse
 from datetime import date
 
 
@@ -112,26 +109,17 @@ class User_group(ListAPIView):
         for group in queryset:
             group = Groups.objects.filter(id = group['group_id']).values()
             for i in group:
-                groupName.append(i['name'])
+                # groupName.append(i['name'])
+                groupName.append({
+                    "groupName":i['name'],
+                    "groupImage":i['image']
+                })
         return groupName
-
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         return Response({"res": queryset})
 
 
-
-# class CreateGroup(CreateAPIView):
-#     queryset = Groups.objects.all()
-#     serializer_class = Groups_serializers
-
-#     def perform_create(self, serializer):
-#         username_list = self.request.data.get('usernames', [])
-#         group = serializer.save()
-
-#         for username in username_list:
-#             user = User.objects.get(username=username)
-#             Participants.objects.create(group=group, user=user)
     
 
 class CreateGroup(CreateAPIView):
@@ -140,26 +128,23 @@ class CreateGroup(CreateAPIView):
 
     def perform_create(self, serializer):
         group_name = self.request.data.get('name', None)
-        Created_by = self.request.data.get('Created_by', None)
-        admin = User.objects.get(username = Created_by)
+        created_by = self.request.data.get('Created_by', None)
+        admin = User.objects.get(username=created_by)
+        # group_image_data = self.request.data.get('group_image', None)
 
-        if group_name is not None:
+        if group_name:
             existing_group = Groups.objects.filter(name__iexact=group_name)
             if existing_group.exists():
                 response_data = {'detail': f'A group with the name "{group_name}" already exists.'}
-                return response_data
+                return Response(response_data, status=400)
 
         username_list = self.request.data.get('usernames', [])
-
-        # Set Created_by and Admin directly in the serializer save method
-        group = serializer.save(Created_by=Created_by, Admin=admin, Created_on = date.today())
-
+        group = serializer.save(Created_by=created_by, Admin=admin, Created_on=date.today())
         for username in username_list:
             user = User.objects.get(username=username)
             Participants.objects.create(group=group, user=user)
 
-
-
+        return Response({'detail': 'Group created successfully.'})
 
 
 
@@ -170,16 +155,18 @@ class GetGroupParticipants(ListAPIView):
     def get_queryset(self):
         group_name = self.kwargs.get('group_name')
         queryset = Participants.objects.filter(group__name=group_name)
-        admin = Groups.objects.filter(name=group_name).values("Admin_id__username","Created_by","Created_on").first()
+        admin = Groups.objects.filter(name=group_name).values("Admin_id__username","Created_by","Created_on","image").first()
         CreatedBy = admin['Created_by']
         CreatedOn = admin['Created_on']
+        groupImage = admin['image']
         admin_username = admin['Admin_id__username'] if admin else None
 
         res = {
             "admin": admin_username,
             "Created_by":CreatedBy,
             "created_on":CreatedOn,
-            'Participants': self.serializer_class(queryset, many=True).data
+            "Group_image":groupImage,
+            "Participants": self.serializer_class(queryset, many=True).data
         }
         return queryset, res
 
@@ -204,3 +191,62 @@ class AddParticipantInGroup(CreateAPIView):
         queryset = Participants.objects.create(user = user_instance, group = group_instance)
         queryset.save()
         return Response("User added successfully")
+    
+
+
+class GetSingleUser(ListAPIView):
+    queryset = User.objects.all()
+    serializer_class =UserSerializer
+    def get_queryset(self):
+        user_name = self.kwargs.get('username')
+        userInstance = User.objects.get(username = user_name)
+        image = User_Image.objects.filter(user = userInstance)
+        image 
+        for i in image:
+            image = i.image
+        res = {
+            "username": user_name,
+            "user_image": str(image)
+        }
+        return Response(res)
+    def list(self, request, *args, **kwargs):
+        res = self.get_queryset()
+        return res
+    
+
+
+class UpdatedGroupAdmin(UpdateAPIView):
+    queryset = Groups.objects.all()
+    serializer_class = Groups_serializers
+    def put(self, request, *args, **kwargs):
+        username = request.data.get('user')
+        group_name = request.data.get('group')
+        try:
+            user_instance = User.objects.get(username=username)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=404)
+
+        try:
+            group_instance = Groups.objects.get(name=group_name)
+        except Groups.DoesNotExist:
+            return Response({'error': 'Group not found'}, status=404)
+        serializer = self.get_serializer(group_instance, data={'Admin': user_instance.id}, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response('Group Admin Updated')
+    
+
+
+class UpdateGroupImage(UpdateAPIView):
+    queryset = Groups.objects.all()
+    serializer_class = Groups_serializers
+    def put(self, request, *args, **kwargs):
+        image = request.data.get('image')
+        group_name = self.kwargs.get('group_name')
+        group_instance = Groups.objects.get(name = group_name)
+        serializer = self.get_serializer(group_instance, data={"image": (image)}, partial = True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response("image updated")
+        else:
+            return Response(serializer.errors)

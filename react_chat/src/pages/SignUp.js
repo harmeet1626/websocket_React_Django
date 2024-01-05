@@ -39,7 +39,6 @@ function SignUp() {
             });
 
             // Handle the response as needed
-            console.log(response.data);
 
             // Redirect to the login page
             navigate('/login');
@@ -70,7 +69,6 @@ function SignUp() {
         })
             .then(response => response.json())
             .then(data => {
-                console.log(data)
             })
             .catch(error => {
                 console.error('API Error:', error);

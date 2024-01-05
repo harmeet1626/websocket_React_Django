@@ -8,6 +8,8 @@ import Modal from 'react-bootstrap/Modal';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Form from 'react-bootstrap/Form';
 import InputEmoji from 'react-input-emoji'
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchGroups } from '../store/chatListing';
 
 export const Conversation = () => {
     const [user, setUser] = useState(() => AuthService.getCurrentUser())
@@ -16,25 +18,23 @@ export const Conversation = () => {
     const apiUrl = process.env.REACT_APP_API_BASE_URL;
     const location = useLocation()
     const [groupList, setGroupList] = useState([])
-    async function fetchGroups() {
-        if (!user?.username) {
-            navigate('/login')
-        }
-        const res = await fetch(`http://${apiUrl}UserGroup/`, {
-            headers: {
-                Authorization: `Token ${user?.token}`
-            }
-        });
-        const data = await res.json();
-        if (data?.detail == "Invalid token.") {
-            navigate('/login')
-        }
-        // setUsers(data);
-        setGroupList(data.res)
+    const dispatch = useDispatch()
+    const GroupListResponse = useSelector((state) => state.groupList)
+    const [activeChat, setActiveChat] = useState()
+
+    function DispatchfetchGroups() {
+        dispatch(fetchGroups(`Token ${user?.token}`))
     }
     useEffect(() => {
-        fetchGroups();
+        if (GroupListResponse.status == 'succeeded') {
+            setGroupList(GroupListResponse.data.res)
+        }
+    }, [GroupListResponse])
+
+    useEffect(() => {
+        DispatchfetchGroups();
     }, [user])
+
     async function fetchUsers() {
         if (!user?.username) {
             navigate('/login')
@@ -51,8 +51,28 @@ export const Conversation = () => {
         fetchUsers();
     }, []);
 
-    const [homepage, setHomepage] = useState()
+
+
     useEffect(() => {
+        var inputString = location.pathname;
+        var splitString = inputString.split('/');
+
+        if (splitString.length > 2) {
+            var result = splitString.slice(2).join('/');
+            setActiveChat(result)
+        } else {
+            console.log("Not enough slashes in the string.");
+        }
+
+    }, [location])
+
+
+    const [homepage, setHomepage] = useState()
+
+
+
+    useEffect(() => {
+
         if (location.pathname == '/') {
             setHomepage(true)
         }
@@ -92,20 +112,19 @@ export const Conversation = () => {
         if (!user?.username) {
             navigate('/login')
         }
+        const form_Data = new FormData()
+        form_Data.append("name", groupNameInput)
+        // form_Data.append("usernames", [checkedUsers])
+        for (const username of checkedUsers) {
+            form_Data.append('usernames', username);
+        }
+        form_Data.append("Created_by", user?.username)
         const res = await fetch(`http://${apiUrl}CreateGroup/`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                "name": groupNameInput,
-                "usernames": checkedUsers,
-                "Created_by":user?.username,
-
-            })
+            body: form_Data
         });
         const data = await res.json();
-        fetchGroups()
+        DispatchfetchGroups()
         handleClose()
     }
     const handleSearch = (e) => {
@@ -114,13 +133,14 @@ export const Conversation = () => {
 
     // Filter array1
     const filteredGroup = groupList.filter((item) =>
-        item.toLowerCase().includes(searchTerm.toLowerCase())
+        item.groupName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     // Filter array2
     const filteredData = users?.filter((item) =>
         item.username.toLowerCase().includes(searchTerm.toLowerCase())
     );
+    const sendProps = "props from parent"
 
     return (
 
@@ -195,20 +215,22 @@ export const Conversation = () => {
                                 </div>
                                 {filteredGroup
                                     .map((group, index) => (
-                                        <div key={index}>
-                                            <li className="clearfix" style={{ borderBottom: "1px solid #ddd" }}>
-                                                <Link to={`groups/${group}`}>
+                                        <Link to={`groups/${group.groupName}`} onClick={() => { setActiveChat(group.groupName) }}>
+                                            <div key={index}>
+                                                <li className="clearfix" style={{ borderBottom: "1px solid #ddd", borderRadius: "40px", backgroundColor: activeChat == group.groupName ? "rgb(225 225 225)" : null }}>
                                                     <div className="about" style={{ display: "flex" }}>
-                                                        <Avatar
-                                                            name={group}
+                                                        {/* <Avatar
+                                                            name={group.groupName}
                                                             round={true} // Optional: Makes the avatar round
                                                             size="30"   // Optional: Set the size of the avatar
-                                                        />&nbsp;&nbsp;
-                                                        <p style={{ padding: "5px" }} className="name">{group}</p>
+                                                        /> */}
+                                                        <img style={{ height: '40px', width: '40px' }} src={`http://${apiUrl}` + group.groupImage} />
+                                                        &nbsp;&nbsp;
+                                                        <p style={{ padding: "5px" }} className="name">{group.groupName}</p>
                                                     </div>
-                                                </Link>
-                                            </li>
-                                        </div>
+                                                </li>
+                                            </div>
+                                        </Link>
                                     ))}
                                 <div style={{ display: "flex" }}>
                                     <p style={{ margin: 'revert' }}>Direct Mssages</p>
@@ -220,24 +242,25 @@ export const Conversation = () => {
                                     filteredData
                                         .filter((u) => u.username !== user?.username)
                                         .map((user, index) => (
-                                            <div key={index}>
-                                                <li className="clearfix" style={{ borderBottom: "1px solid #ddd" }}>
-                                                    <Link to={`user/${createConversationName(user.username)}`}>
+                                            <Link to={`user/${createConversationName(user.username)}`} onClick={() => { setActiveChat(user.username) }}>
+                                                <div key={index}>
+                                                    <li className="clearfix" style={{ borderBottom: "1px solid #ddd", borderRadius: "40px", backgroundColor: activeChat == createConversationName(user.username) ? "rgb(225 225 225)" : null }}>
                                                         <div className="about" style={{ display: "flex" }}>
-                                                            <Avatar
+                                                            {/* <Avatar
                                                                 name={user.username}
                                                                 round={true} // Optional: Makes the avatar round
                                                                 size="30"   // Optional: Set the size of the avatar
-                                                            />&nbsp;&nbsp;
+                                                            /> */}
+                                                            <img style={{ height: '40px', width: "40px" }} src={user.user_picture} />
+                                                            &nbsp;&nbsp;
                                                             <p style={{ padding: "5px" }} className="name">{user.username}</p>
                                                         </div>
-                                                    </Link>
-                                                </li>
-                                            </div>
+                                                    </li>
+                                                </div>
+                                            </Link>
                                         ))}
                             </ul>
                         </div>
-
                     </div>
                     <div>
                         {homepage ?

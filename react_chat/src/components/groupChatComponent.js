@@ -4,7 +4,6 @@ import Avatar from 'react-avatar';
 import AuthService from '../auth/AuthService';
 import InputEmoji from 'react-input-emoji'
 import useWebSocket, { ReadyState } from "react-use-websocket";
-import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Tab from 'react-bootstrap/Tab';
@@ -12,7 +11,13 @@ import Tabs from 'react-bootstrap/Tabs';
 import Accordion from 'react-bootstrap/Accordion';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
-
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
+import { BsTrash } from 'react-icons/bs';
+import { BiSolidAddToQueue, BiDotsVerticalRounded } from "react-icons/bi";
+import Button from "react-bootstrap/esm/Button";
+import { useDispatch } from "react-redux";
+import { fetchGroups } from "../store/chatListing";
 
 
 
@@ -30,8 +35,14 @@ export const GroupChat = () => {
     const [groupAdmin, setGroupAdmin] = useState('')
     const [createdBy, setCreatedBy] = useState('')
     const [createdOn, setCreatedOn] = useState('')
+    const [groupImage, setGroupImage] = useState('')
+    const [selectedImage, setSelectedImage] = useState(null);
+    const dispatch = useDispatch()
 
-    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://${apiUrl}groupChat/${params.groupName}/` : null, {
+
+
+    const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://${apiUrl}groupChat/${params.groupName}/`
+        : null, {
         queryParams: {
             token: user ? user.token : "",
         },
@@ -91,6 +102,8 @@ export const GroupChat = () => {
             }
         }
     });
+
+
     function formatTime(timestamp) {
         const date = new Date(timestamp);
         const hours = date.getHours().toString().padStart(2, '0');
@@ -98,6 +111,8 @@ export const GroupChat = () => {
         const formattedTime = `${hours}:${minutes}`;
         return formattedTime
     }
+
+
     const handleSubmit = () => {
         if (message.length === 0) return;
         if (message.length > 512) return;
@@ -124,13 +139,7 @@ export const GroupChat = () => {
             behavior: 'instant',
         })
     };
-    const handleFileChange = (e) => {
-        const selectedFile = e.target.files[0];
 
-        if (selectedFile) {
-            uploadDocument(selectedFile)
-        }
-    };
     async function fetchParticipants() {
         const res = await fetch(`http://${apiUrl}GetGroupParticipants/${params.groupName}`, {
             method: "GET",
@@ -140,6 +149,23 @@ export const GroupChat = () => {
         setCreatedOn(data?.created_on)
         setCreatedBy(data?.Created_by)
         setParticipants(data?.Participants)
+        setGroupImage(`http://` + apiUrl + data.Group_image)
+
+    }
+
+    async function UpdateGroupAdmin(username) {
+        const res = await fetch(`http://${apiUrl}UpdatedGroupAdmin/`, {
+            method: "PUT",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                group: params.groupName,
+                user: username
+            })
+        });
+        const data = await res.json();
+        fetchParticipants()
 
     }
     useEffect(() => {
@@ -156,29 +182,31 @@ export const GroupChat = () => {
         const data = await res.json();
         setUsers(data);
     }
+    const handleFileChange = async (e) => {
+        const selectedFile = e.target.files[0];
 
+        if (selectedFile) {
+            let data = await uploadDocument(selectedFile)
+            let file_url = data.response[0].file.file
+            sendJsonMessage({
+                type: "group_file",
+                file_url
+            })
+        }
+    };
     async function uploadDocument(fileName) {
         const apiEndpoint = `http://${apiUrl}documentUpload/`;
 
         const form_Data = new FormData()
         form_Data.append("image", fileName)
 
-        await fetch(apiEndpoint, {
+        const response = await fetch(apiEndpoint, {
             method: 'PUT',
             body: form_Data
 
         })
-            .then(response => response.json())
-            .then(data => {
-                let file_url = data.response[0].file.file
-                sendJsonMessage({
-                    type: "group_file",
-                    file_url
-                })
-            })
-            .catch(error => {
-                console.error('API Error:', error);
-            });
+        let data = await response.json()
+        return data
     }
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
@@ -232,14 +260,39 @@ export const GroupChat = () => {
                 console.error('API Error:', error);
             });
     }
+    const handleImageClick = (imageUrl) => {
+        window.open(imageUrl, '_blank');
+    };
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        setSelectedImage(file);
+    };
+
+    const handleImageUpload = async () => {
+        if (selectedImage) {
+            const form_Data = new FormData()
+            form_Data.append("image", selectedImage)
+            fetch(`http://${apiUrl}UpdateGroupImage/${params.groupName}`, {
+                method: 'PUT',
+                body: form_Data,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    fetchParticipants()
+                    dispatch(fetchGroups(`Token ${user?.token}`))
+                })
+                .catch(error => {
+                    console.error('Error uploading image', error);
+                });
+        }
+    };
     return (
         <>
             <div className="chat" >
                 <Modal show={show} onHide={handleClose} animation={false}>
                     <Modal.Header closeButton>
-                        <Modal.Title>{params.groupName}</Modal.Title>
+                        <Modal.Title><img style={{ height: "50px", width: '50px', borderRadius: '40px' }} src={groupImage} />&nbsp;&nbsp;{params.groupName}</Modal.Title>
                     </Modal.Header>
-
                     <Tabs
                         defaultActiveKey="profile"
                         id="uncontrolled-tab-example"
@@ -253,28 +306,67 @@ export const GroupChat = () => {
                                         <ListGroup >
                                             {participants.map((u) => (
                                                 <div >
-                                                    <ListGroup.Item style={{ textTransform: 'uppercase', }}
+                                                    <div style={{ textTransform: 'uppercase', padding: '10px' }}
                                                         key={u.username} className="d-flex justify-content-between align-items-center">
-                                                        <span>
+                                                        <span style={{ display: 'flex' }}>
+                                                            <img style={{ height: '30px', width: "30px", borderRadius: '10px' }} src={'http://127.0.0.1:8000/' + u.user_image} /> &nbsp;&nbsp;
+                                                            <p style={{ marginTop: "auto", color: u.username == user.username ? 'rgb(41, 155, 211)' : null }}>{u.username}</p>
+                                                            {u.username === groupAdmin && <span style={{ fontSize: '10px', color: 'green' }}>&nbsp; admin</span>}
                                                             <span style={{ color: u.username === user.username ? 'green' : 'black', fontSize: u.username === groupAdmin ? 'small' : 'inherit' }}>
-                                                                {u.username}
-                                                                {u.username === groupAdmin && <span style={{ fontSize: 'small' }}> (admin)</span>}
+                                                                {user.username === groupAdmin ?
+                                                                    <Dropdown>
+                                                                        <Dropdown.Toggle
+                                                                            id="dropdown-basic-button"
+                                                                            variant="transparent"
+                                                                            style={{
+                                                                                padding: '2px',
+                                                                                border: 'none',
+                                                                                background: 'none',
+                                                                                cursor: 'pointer',
+                                                                            }}
+                                                                        >
+                                                                        </Dropdown.Toggle>
+
+                                                                        <Dropdown.Menu>
+                                                                            <Dropdown.Item onClick={() => removeFromGroup(u)}>
+                                                                                <div className="d-flex align-items-center">
+                                                                                    <p style={{ margin: '0' }}>Remove From group</p>
+                                                                                    <span
+                                                                                        style={{
+                                                                                            cursor: 'pointer',
+                                                                                            borderRadius: '5px',
+                                                                                            marginLeft: '10px', // Adjust margin as needed
+                                                                                        }}
+                                                                                        className="material-symbols-outlined"
+                                                                                    >
+                                                                                        <BsTrash />
+                                                                                    </span>
+                                                                                </div>
+                                                                            </Dropdown.Item>
+                                                                            <Dropdown.Item onClick={() => UpdateGroupAdmin(u.username)}>
+                                                                                <div className="d-flex align-items-center">
+                                                                                    <p style={{ margin: '0' }} >Make Group Admin</p>
+                                                                                    <span class="material-symbols-outlined">
+                                                                                        admin_panel_settings
+                                                                                    </span>
+                                                                                </div>
+                                                                            </Dropdown.Item>
+                                                                        </Dropdown.Menu>
+                                                                    </Dropdown>
+                                                                    : null}
                                                             </span>
+
                                                         </span>
 
                                                         {u.username !== user.username && groupAdmin == user.username && (
-                                                            <span
-                                                                onClick={() => removeFromGroup(u)}
-                                                                style={{
-                                                                    cursor: 'pointer',
-                                                                    borderRadius: '5px',
-                                                                }}
-                                                                className="material-symbols-outlined"
-                                                            >
-                                                                close
-                                                            </span>
+                                                            <div>
+                                                                {/* <span style={{ cursor: 'pointer' }} class="material-symbols-outlined">
+                                                                    more_vert
+                                                                </span> */}
+
+                                                            </div>
                                                         )}
-                                                    </ListGroup.Item>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </ListGroup>
@@ -291,16 +383,41 @@ export const GroupChat = () => {
                                                         <ListGroup.Item style={{ textTransform: 'uppercase' }} key={u.username} className="d-flex justify-content-between align-items-center">
                                                             <span>{u.username} {u.username === user.username ? "(You)" : null}</span>
                                                             {u.username !== user.username && (
-                                                                <span
-                                                                    onClick={() => addUserToGroup(u)}
-                                                                    style={{
-                                                                        cursor: 'pointer',
-                                                                        borderRadius: '5px',
-                                                                    }}
-                                                                    className="material-symbols-outlined"
-                                                                >
-                                                                    add
-                                                                </span>
+                                                                <div>
+                                                                    <Dropdown>
+                                                                        <Dropdown.Toggle
+                                                                            id="dropdown-basic-button"
+                                                                            variant="transparent"
+                                                                            style={{
+                                                                                padding: '0',
+                                                                                border: 'none',
+                                                                                background: 'none',
+                                                                                cursor: 'pointer',
+                                                                            }}
+                                                                        >
+                                                                            <BiDotsVerticalRounded />
+                                                                        </Dropdown.Toggle>
+
+                                                                        <Dropdown.Menu>
+                                                                            <Dropdown.Item onClick={() => addUserToGroup(u)}>
+                                                                                <div className="d-flex align-items-center">
+                                                                                    <p style={{ margin: '0' }}>
+                                                                                        Add to group</p>
+                                                                                    <span
+                                                                                        style={{
+                                                                                            cursor: 'pointer',
+                                                                                            borderRadius: '5px',
+                                                                                            marginLeft: '10px', // Adjust margin as needed
+                                                                                        }}
+                                                                                        className="material-symbols-outlined"
+                                                                                    >
+                                                                                        <BiSolidAddToQueue />
+                                                                                    </span>
+                                                                                </div>
+                                                                            </Dropdown.Item>
+                                                                        </Dropdown.Menu>
+                                                                    </Dropdown>
+                                                                </div>
                                                             )}
                                                         </ListGroup.Item>
                                                     </div>
@@ -308,8 +425,6 @@ export const GroupChat = () => {
                                         </Accordion.Body>
                                     </Accordion.Item>
                                     : ""}
-
-
                             </Accordion>
                         </Tab>
                         <Tab eventKey="profile" title="About">
@@ -337,8 +452,6 @@ export const GroupChat = () => {
                                                 disabled={true}
                                             />
                                         </InputGroup>
-
-                                        
                                     </Accordion.Body>
                                 </Accordion.Item>
                                 {/* <Accordion.Item eventKey="1">
@@ -361,41 +474,40 @@ export const GroupChat = () => {
                                 {reverced_messageHistory
                                     .filter((u) => u.file !== "")
                                     .map((u, index) => (
-                                        <div key={index}>
-                                            <img style={{ height: "50px", width: "80px" }} src={'http://127.0.0.1:8000' + u.file} alt={`Image ${index}`} />
+                                        <div key={index} onClick={() => handleImageClick('http://127.0.0.1:8000' + u.file)}>
+                                            <img style={{ height: "50px", width: "80px", cursor: 'pointer' }} src={'http://127.0.0.1:8000' + u.file} alt={`Image ${index}`} />
                                         </div>
                                     ))}
                             </div>
                         </Tab>
-
-                        <Tab eventKey="Settings" title="Settings">
-                            Tab content for Contact
-                        </Tab>
+                        {user.username == groupAdmin ?
+                            <Tab eventKey="Settings" title="Settings">
+                                <div style={{ padding: '10px' }}>
+                                    <input type="file" accept="image/*" onChange={handleImageChange} />
+                                    <Button onClick={handleImageUpload}>Update Image</Button>
+                                </div>
+                            </Tab>
+                            : ""}
                     </Tabs>
 
-                    <Modal.Footer>
-                        <Button variant="secondary" onClick={handleClose}>
-                            Close
-                        </Button>
-                        {/* <Button variant="danger" onClick={handleClose}>
-                            Leave Group
-                        </Button> */}
-                    </Modal.Footer>
                 </Modal>
                 <div className="chat-header clearfix" style={{ backgroundColor: "whitesmoke", height: '65px' }}>
                     <div className="row">
-                        <div className="col-lg-6">
+                        <div className="col-lg-6" style={{ cursor: "pointer" }} onClick={handleShow}>
                             <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
                             </a>
                             <div className="chat-about" style={{ display: "flex" }}>
-                                <Avatar
+                                {/* <Avatar
                                     name={params.groupName}
                                     round={true}
                                     size="30"
-                                />&nbsp;&nbsp;
+                                /> */}
+                                <img src={groupImage} />
+
+                                &nbsp;&nbsp;
                                 <h6 style={{ padding: "5px", textTransform: 'uppercase' }} className="m-b-0">{params.groupName}</h6>
                             </div>
-                            <span style={{ padding: "3px", cursor: "pointer" }} onClick={handleShow} class="material-symbols-outlined">
+                            <span style={{ padding: "3px" }} class="material-symbols-outlined">
                                 list
                             </span>
                         </div>
@@ -418,7 +530,7 @@ export const GroupChat = () => {
                                             <div style={{ fontWeight: "bold", color: 'maroon', textTransform: 'capitalize', fontSize: '12px', height: '20px' }}>{message.from_user_id}</div>
                                         }
                                         {message.content == "" ?
-                                            <img style={{ height: "150px" }} src={'http://127.0.0.1:8000' + message.file} />
+                                            <img onClick={() => handleImageClick(`http://127.0.0.1:8000` + message.file)} style={{ height: "150px", cursor: 'pointer' }} src={'http://127.0.0.1:8000' + message.file} />
                                             :
                                             message.content
                                         }

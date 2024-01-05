@@ -5,7 +5,7 @@ import AuthService from '../auth/AuthService';
 import Avatar from 'react-avatar';
 import InputEmoji from 'react-input-emoji'
 
-export const ChatComponent = () => {
+export const ChatComponent = (props) => {
 
     const [welcomeMessage, setWelcomeMessage] = useState("");
     const [messageHistory, setMessageHistory] = useState([]);
@@ -26,6 +26,8 @@ export const ChatComponent = () => {
     const location = useLocation()
 
     const { conversationName } = useParams();
+    const [userImage, setUserImage] = useState('')
+
     const [loading, setLoading] = useState(true)
     function GetName() {
         const fullName = conversationName;
@@ -38,10 +40,7 @@ export const ChatComponent = () => {
             return filteredNameArray[1]
         }
     }
-
     const apiUrl = process.env.REACT_APP_API_BASE_URL;
-
-
     const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://${apiUrl}chats/${conversationName}/` : null, {
         queryParams: {
             token: user ? user.token : "",
@@ -119,6 +118,7 @@ export const ChatComponent = () => {
     }
     useEffect(() => {
         fetchConversation();
+        fetchUser()
     }, [conversationName, user]);
 
     const connectionStatus = {
@@ -204,6 +204,19 @@ export const ChatComponent = () => {
             });
     }
 
+    async function fetchUser() {
+        let name = GetName()
+        const res = await fetch(`http://${apiUrl}GetSingleUser/${name}`, {
+            headers: {
+                Authorization: `Token ${user?.token}`
+            },
+        });
+        const data = await res.json();
+        setUserImage(`http://` + apiUrl + data.user_image)
+    }
+    const handleImageClick = (imageUrl) => {
+        window.open(imageUrl, '_blank');
+    };
     return (
         <>
             <div className="chat" >
@@ -213,11 +226,14 @@ export const ChatComponent = () => {
                             <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
                             </a>
                             <div className="chat-about" style={{ display: "flex" }}>
-                                <Avatar
+                                {/* <Avatar
                                     name={GetName()}
                                     round={true} // Optional: Makes the avatar round
                                     size="30"   // Optional: Set the size of the avatar
-                                />&nbsp;&nbsp;
+                                /> */}
+                                <img src={userImage} />
+
+                                &nbsp;&nbsp;
                                 <h6 style={{ padding: "5px", textTransform: 'uppercase' }} className="m-b-0">{GetName()}</h6>
 
                                 {
@@ -253,7 +269,7 @@ export const ChatComponent = () => {
                                 <div>
                                     <div style={{ padding: "5px 20px", wordBreak: "break-word", backgroundColor: message.from_user.username === user.username ? "rgb(133 196 235)" : "#f3f3f3" }} className={message.from_user.username === user.username ? "message other-message float-right" : "message my-message"}>
                                         {message.content == "" ?
-                                            <img style={{ height: "150px" }} src={'http://127.0.0.1:8000' + message.file} />
+                                            <img onClick={() => handleImageClick('http://127.0.0.1:8000' + message.file)} style={{ height: "150px", cursor: "pointer" }} src={'http://127.0.0.1:8000' + message.file} />
                                             :
                                             message.content}
 
@@ -271,8 +287,6 @@ export const ChatComponent = () => {
                         ))}
                     </ul>
                 </div>
-
-
                 <div className="input-group mb-0" style={{ flexWrap: "unset" }}>
                     <InputEmoji
                         cleanOnEnter
