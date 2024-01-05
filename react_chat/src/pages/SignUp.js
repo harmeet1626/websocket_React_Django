@@ -22,39 +22,49 @@ function SignUp() {
     const navigate = useNavigate()
     const apiUrl = process.env.REACT_APP_API_BASE_URL;
     const [image, setImage] = useState()
-    async function createUser() {
-        const form_Data = new FormData();
-        form_Data.append("image", image);
+    const [selectedImage, setSelectedImage] = useState(null);
 
+
+    async function createUser() {
         try {
-            const response = await axios.post(`http://${apiUrl}create-user/`, form_Data, {
+            const response = await axios.post(`http://${apiUrl}create-user/`, {
+                username: username_input,
+                email: email_input,
+                password: password_input,
+            }, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-                data: {
-                    username: username_input,
-                    email: email_input,
-                    password: password_input,
+                    'Content-Type': 'application/json',
                 },
             });
 
-            // Handle the response as needed
+            handleImageUpload();
 
-            // Redirect to the login page
-            navigate('/login');
         } catch (error) {
-            // Handle errors
             console.error('Error creating user:', error);
         }
     }
 
+    const handleImageUpload = async () => {
+        if (selectedImage) {
+            const form_Data = new FormData()
+            form_Data.append("image", selectedImage)
+            fetch(`http://${apiUrl}UpdateUserImage/${username_input}`, {
+                method: 'PUT',
+                body: form_Data,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    navigate('/login');
+                })
+                .catch(error => {
+                    console.error('Error uploading image', error);
+                });
+        }
+    };
     const fileInputRef = useRef(null);
-    const handleFileChange = (e) => {
-        const selectedFile = e.target.files[0];
-        setImage(e.target.files[0])
-        // if (selectedFile) {
-        //     uploadDocument(selectedFile)
-        // }
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        setSelectedImage(file);
     };
     async function uploadDocument(fileName) {
         const apiEndpoint = `http://${apiUrl}documentUpload/`;
@@ -99,15 +109,13 @@ function SignUp() {
                                 {/* <MDBIcon fas icon="lock me-3" size='lg' /> */}
                                 <MDBInput value={password_input} onChange={(e) => setPassword_input(e.target.value)} label='Password' id='form3' type='password' />
                             </div>
-                            {/* <div className="d-flex flex-row align-items-center mb-4 ">
+                            <div className="d-flex flex-row align-items-center mb-4 ">
 
-                                <div className="">
-                                    <label for="file-input">Choose a profile picture:</label><br></br>
-                                    <input ref={fileInputRef}
-                                        onChange={handleFileChange}
-                                        type="file" id="file-input" name="ImageStyle" />
+                                <div className="" style={{ paddingLeft: "50px" }}>
+                                    <h6 for="file-input"> Profile Picture</h6><br></br>
+                                    <input type="file" accept="image/*" onChange={handleImageChange} />
                                 </div>
-                            </div> */}
+                            </div>
 
                             {/* <div className="d-flex flex-row align-items-center mb-4">
                                 <MDBIcon fas icon="key me-3" size='lg' />

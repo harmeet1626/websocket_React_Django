@@ -1,7 +1,7 @@
 from chats.seriailizers import UserSerializer
 from chats.seriailizers import ConversationSerializer
 from chats.models import Conversation, Message, Participants, Groups, Group_content, User_Image
-from chats.seriailizers import MessageSerializer, CreateUserSerializer, UploadDocumentsSerializer, ParticipantSerializer, Group_content_serializer, Groups_serializers
+from chats.seriailizers import MessageSerializer, CreateUserSerializer, UploadDocumentsSerializer, ParticipantSerializer, Group_content_serializer, Groups_serializers, UserImageSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.response import Response
@@ -130,10 +130,6 @@ class CreateGroup(CreateAPIView):
         group_name = self.request.data.get('name', None)
         created_by = self.request.data.get('Created_by', None)
         admin = User.objects.get(username=created_by)
-        # group_image_data = self.request.data.get('group_image', None)
-        print("group name is:-",group_name)
-        print('created_by is :- ', created_by)
-        print('admin is :-', admin)
 
         if group_name:
             existing_group = Groups.objects.filter(name__iexact=group_name)
@@ -253,3 +249,17 @@ class UpdateGroupImage(UpdateAPIView):
             return Response("image updated")
         else:
             return Response(serializer.errors)
+
+
+class UpdateUserImage(UpdateAPIView):
+    queryset = User_Image.objects.all()
+    serializer_class = UserImageSerializer
+
+    def put(self, request, *args, **kwargs):
+        username = self.kwargs.get('username')
+        user_instance = User.objects.get(username=username)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=user_instance)
+        return Response("Image updated")
+

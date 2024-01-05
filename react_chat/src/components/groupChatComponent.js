@@ -11,7 +11,6 @@ import Accordion from 'react-bootstrap/Accordion';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
 import { BsTrash } from 'react-icons/bs';
 import { BiSolidAddToQueue } from "react-icons/bi";
 import Button from "react-bootstrap/esm/Button";
@@ -489,9 +488,6 @@ export const GroupChat = () => {
                                                 disabled={true}
                                             />
                                         </InputGroup>
-                                        {user.username !== groupAdmin ?
-                                            <Button variant="danger" onClick={() => removeFromGroup()}>Leave Group</Button> : null
-                                        }
                                     </Accordion.Body>
                                 </Accordion.Item>
                             </Accordion>
