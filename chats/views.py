@@ -131,6 +131,9 @@ class CreateGroup(CreateAPIView):
         created_by = self.request.data.get('Created_by', None)
         admin = User.objects.get(username=created_by)
         # group_image_data = self.request.data.get('group_image', None)
+        print("group name is:-",group_name)
+        print('created_by is :- ', created_by)
+        print('admin is :-', admin)
 
         if group_name:
             existing_group = Groups.objects.filter(name__iexact=group_name)

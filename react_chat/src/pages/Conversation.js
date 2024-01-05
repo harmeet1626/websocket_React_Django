@@ -21,6 +21,7 @@ export const Conversation = () => {
     const dispatch = useDispatch()
     const GroupListResponse = useSelector((state) => state.groupList)
     const [activeChat, setActiveChat] = useState()
+    const [selectedImage, setSelectedImage] = useState(null);
 
     function DispatchfetchGroups() {
         dispatch(fetchGroups(`Token ${user?.token}`))
@@ -121,11 +122,18 @@ export const Conversation = () => {
         form_Data.append("Created_by", user?.username)
         const res = await fetch(`http://${apiUrl}CreateGroup/`, {
             method: "POST",
-            body: form_Data
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                usernames: checkedUsers,
+                name: groupNameInput,
+                Created_by: user.username
+            })
         });
         const data = await res.json();
-        DispatchfetchGroups()
-        handleClose()
+        handleImageUpload()
     }
     const handleSearch = (e) => {
         setSearchTerm(e.target.value);
@@ -140,7 +148,30 @@ export const Conversation = () => {
     const filteredData = users?.filter((item) =>
         item.username.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    const sendProps = "props from parent"
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        setSelectedImage(file);
+    };
+    const handleImageUpload = async () => {
+        if (selectedImage) {
+            const form_Data = new FormData()
+            form_Data.append("image", selectedImage)
+            fetch(`http://${apiUrl}UpdateGroupImage/${groupNameInput}`, {
+                method: 'PUT',
+                body: form_Data,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    dispatch(fetchGroups(`Token ${user?.token}`))
+                    DispatchfetchGroups()
+                    handleClose()
+                })
+                .catch(error => {
+                    console.error('Error uploading image', error);
+                });
+        }
+    };
 
     return (
 
@@ -155,6 +186,10 @@ export const Conversation = () => {
                     <Modal.Header closeButton>
                         <Modal.Title>Create Group</Modal.Title>
                     </Modal.Header>
+                    <div style={{ padding: '10px' }}>
+                        <h6>Choose Group Icon</h6>
+                        <input type="file" accept="image/*" onChange={handleImageChange} />
+                    </div>
                     <InputGroup size="sm" className="mb-3">
                         <InputEmoji
                             cleanOnEnter
@@ -166,7 +201,7 @@ export const Conversation = () => {
                         />
                     </InputGroup>
                     <Form style={{ padding: "10px" }}>
-                        <p>Participants</p>
+                        <h6>Participants</h6>
                         {users
                             .filter((u) => u.username !== user?.username)
                             .map((u) => (
