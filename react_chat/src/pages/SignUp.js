@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import {
     MDBBtn,
@@ -21,20 +21,72 @@ function SignUp() {
     const [password_input, setPassword_input] = useState('')
     const navigate = useNavigate()
     const apiUrl = process.env.REACT_APP_API_BASE_URL;
+    const [image, setImage] = useState()
+    const [selectedImage, setSelectedImage] = useState(null);
+
+
     async function createUser() {
-        const response = await axios.post(`http://${apiUrl}create-user/`,
-            {
+        try {
+            const response = await axios.post(`http://${apiUrl}create-user/`, {
                 username: username_input,
                 email: email_input,
-                password: password_input
-            }
-        )
-        navigate('/login')
+                password: password_input,
+            }, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            handleImageUpload();
+
+        } catch (error) {
+            console.error('Error creating user:', error);
+        }
+    }
+
+    const handleImageUpload = async () => {
+        if (selectedImage) {
+            const form_Data = new FormData()
+            form_Data.append("image", selectedImage)
+            fetch(`http://${apiUrl}UpdateUserImage/${username_input}`, {
+                method: 'PUT',
+                body: form_Data,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    navigate('/login');
+                })
+                .catch(error => {
+                    console.error('Error uploading image', error);
+                });
+        }
+    };
+    const fileInputRef = useRef(null);
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        setSelectedImage(file);
+    };
+    async function uploadDocument(fileName) {
+        const apiEndpoint = `http://${apiUrl}documentUpload/`;
+
+        const form_Data = new FormData()
+        form_Data.append("image", fileName)
+
+        await fetch(apiEndpoint, {
+            method: 'PUT',
+            body: form_Data
+
+        })
+            .then(response => response.json())
+            .then(data => {
+            })
+            .catch(error => {
+                console.error('API Error:', error);
+            });
     }
 
     return (
         <MDBContainer fluid>
-
             <MDBCard className='text-black m-5' style={{ borderRadius: '25px' }}>
                 <MDBCardBody>
                     <MDBRow>
@@ -43,18 +95,26 @@ function SignUp() {
                             <p classNAme="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
 
                             <div className="d-flex flex-row align-items-center mb-4 ">
-                                <MDBIcon fas icon="user me-3" size='lg' />
+
+                                {/* <MDBIcon fas icon="user me-3" size='lg' /> */}
                                 <MDBInput value={username_input} onChange={(e) => setUsername_input(e.target.value)} label='Username' id='form1' type='text' className='w-100' />
                             </div>
 
                             <div className="d-flex flex-row align-items-center mb-4">
-                                <MDBIcon fas icon="envelope me-3" size='lg' />
+                                {/* <MDBIcon fas icon="envelope me-3" size='lg' /> */}
                                 <MDBInput value={email_input} onChange={(e) => setEmail_input(e.target.value)} label='Your Email' id='form2' type='email' />
                             </div>
 
                             <div className="d-flex flex-row align-items-center mb-4">
-                                <MDBIcon fas icon="lock me-3" size='lg' />
+                                {/* <MDBIcon fas icon="lock me-3" size='lg' /> */}
                                 <MDBInput value={password_input} onChange={(e) => setPassword_input(e.target.value)} label='Password' id='form3' type='password' />
+                            </div>
+                            <div className="d-flex flex-row align-items-center mb-4 ">
+
+                                <div className="" style={{ paddingLeft: "50px" }}>
+                                    <h6 for="file-input"> Profile Picture</h6><br></br>
+                                    <input type="file" accept="image/*" onChange={handleImageChange} />
+                                </div>
                             </div>
 
                             {/* <div className="d-flex flex-row align-items-center mb-4">

@@ -19,9 +19,11 @@ export default function Navbar() {
     const navigate = useNavigate()
     const location = useLocation()
     return (
-        <MDBNavbar expand='lg' light bgColor='light'>
+        <MDBNavbar expand='lg' style={{ backgroundColor: "rgb(41 155 211)" }}>
             <MDBContainer fluid>
-                <MDBNavbarBrand href='#'>Navbar</MDBNavbarBrand>
+                <MDBNavbarBrand href='#'><span style={{ padding: "2px" }} class="material-symbols-outlined">
+                    forum
+                </span> Chat Application</MDBNavbarBrand>
                 <MDBNavbarToggler
                     type='button'
                     aria-expanded='false'
@@ -58,7 +60,7 @@ export default function Navbar() {
                                     }}>logout</MDBNavbarLink>
                                 </MDBNavbarItem>
                                 <MDBNavbarItem className='ml-auto home_button' style={{ marginLeft: 'auto' }}>
-                                    <MDBNavbarLink style={{ fontWeight: 'bold' }}>{user?.username}</MDBNavbarLink>
+                                    <MDBNavbarLink style={{ fontWeight: 'bold', textTransform: 'capitalize' }}>{user?.username}</MDBNavbarLink>
                                 </MDBNavbarItem>
 
                             </>

@@ -1,9 +1,9 @@
 import Navbar from './components/navbar';
 import { Router_view } from './routes/routes';
-
+import './App.css'
 function App() {
   return (
-    <div>
+    <div className='application'>
       <Navbar />
       <Router_view />
     </div>

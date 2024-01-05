@@ -1,7 +1,8 @@
-body{
+body {
     background-color: #f4f7f6;
-    margin-top:20px;
+    margin-top: 20px;
 }
+
 .card {
     background: #fff;
     transition: .5s;
@@ -12,6 +13,7 @@ body{
     width: 100%;
     box-shadow: 0 1px 2px 0 rgb(0 0 0 / 10%);
 }
+
 .chat-app .people-list {
     width: 280px;
     position: absolute;
@@ -145,7 +147,7 @@ body{
 }
 
 .chat .chat-history .my-message {
-    background: #efefef
+    background-color: rgb(245, 245, 245)
 }
 
 .chat .chat-history .my-message:after {
@@ -157,7 +159,7 @@ body{
     width: 0;
     position: absolute;
     pointer-events: none;
-    border-bottom-color: #efefef;
+    border-bottom-color: rgb(245, 245, 245);
     border-width: 10px;
     margin-left: -10px
 }
@@ -168,8 +170,8 @@ body{
 }
 
 .chat .chat-history .other-message:after {
-    border-bottom-color: #e8f1f3;
-    left: 93%
+    border-bottom-color: rgb(133 196 235);
+    left: 93%;
 }
 
 .chat .chat-message {
@@ -218,15 +220,19 @@ body{
         left: -400px;
         display: none
     }
+
     .chat-app .people-list.open {
         left: 0
     }
+
     .chat-app .chat {
         margin: 0
     }
+
     .chat-app .chat .chat-header {
         border-radius: 0.55rem 0.55rem 0 0
     }
+
     .chat-app .chat-history {
         height: 300px;
         overflow-x: auto
@@ -238,6 +244,7 @@ body{
         height: 650px;
         overflow-x: auto
     }
+
     .chat-app .chat-history {
         height: 600px;
         overflow-x: auto
@@ -249,11 +256,9 @@ body{
         height: 480px;
         overflow-x: auto
     }
+
     .chat-app .chat-history {
         height: calc(100vh - 350px);
         overflow-x: auto
     }
 }
-
-
-

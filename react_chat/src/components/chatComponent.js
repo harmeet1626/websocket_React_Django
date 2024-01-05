@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import AuthService from '../auth/AuthService';
 import Avatar from 'react-avatar';
-export const ChatComponent = () => {
+import InputEmoji from 'react-input-emoji'
+
+export const ChatComponent = (props) => {
 
     const [welcomeMessage, setWelcomeMessage] = useState("");
     const [messageHistory, setMessageHistory] = useState([]);
@@ -20,30 +22,25 @@ export const ChatComponent = () => {
 
     const [typing, setTyping] = useState(false);
 
-    const { conversationName } = useParams();
+    const [userActive, setUserActive] = useState(false)
+    const location = useLocation()
 
+    const { conversationName } = useParams();
+    const [userImage, setUserImage] = useState('')
+
+    const [loading, setLoading] = useState(true)
     function GetName() {
         const fullName = conversationName;
-
-        // Split the string using "__" as the delimiter
         const nameArray = fullName.split("__");
-
-        // Filter out any empty strings resulting from consecutive "__" occurrences
         const filteredNameArray = nameArray.filter(part => part.trim() !== "");
-
-        // Log the result
-        console.log(filteredNameArray, 'test')
-        if(filteredNameArray[1] == user?.username){
+        if (filteredNameArray[1] == user?.username) {
             return filteredNameArray[0]
-            
-        }else{
+
+        } else {
             return filteredNameArray[1]
         }
     }
-
     const apiUrl = process.env.REACT_APP_API_BASE_URL;
-
-
     const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://${apiUrl}chats/${conversationName}/` : null, {
         queryParams: {
             token: user ? user.token : "",
@@ -61,10 +58,17 @@ export const ChatComponent = () => {
                 case "welcome_message":
                     setWelcomeMessage(data.message);
                     break;
+                case 'file':
+                    console.log("file event triggered onMessage")
+                    const fileUrlOrIdentifier = data.file_url_or_identifier;
+                    break;
                 case "chat_message_echo":
+                    console.log('chat_message_echo', data.message)
                     setMessageHistory((prev) => [data.message, ...prev]);
                     sendJsonMessage({ type: "read_messages" });
                     break;
+                case "read_messages":
+                    console.log("read_messages")
                 case "last_50_messages":
                     setMessageHistory(data.messages);
                     setHasMoreMessages(data.has_more);
@@ -88,6 +92,7 @@ export const ChatComponent = () => {
                     break;
 
                 case 'typing':
+                    console.log('user typing')
                     // updateTyping(data);
                     break;
 
@@ -97,29 +102,24 @@ export const ChatComponent = () => {
             }
         }
     });
-
-
-
-    useEffect(() => {
-        async function fetchConversation() {
-            const apiRes = await fetch(`http://${apiUrl}conversations/${conversationName}/`, {
-                method: "GET",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json",
-                    Authorization: `Token ${user?.token}`
-                }
-            });
-            if (apiRes.status === 200) {
-                const data = await apiRes.json();
-                setConversation(data);
+    async function fetchConversation() {
+        const apiRes = await fetch(`http://${apiUrl}conversations/${conversationName}/`, {
+            method: "GET",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                Authorization: `Token ${user?.token}`
             }
+        });
+        if (apiRes.status === 200) {
+            const data = await apiRes.json();
+            setConversation(data);
         }
+    }
+    useEffect(() => {
         fetchConversation();
+        fetchUser()
     }, [conversationName, user]);
-
-
-
 
     const connectionStatus = {
         [ReadyState.CONNECTING]: "Connecting",
@@ -135,22 +135,24 @@ export const ChatComponent = () => {
             });
         }
     }, [connectionStatus, sendJsonMessage]);
-
-    function handleChangeMessage(e) {
-        setMessage(e.target.value);
-        // onType();
-    }
-    const containerRef = useRef(null)
-
+    const containerRef = useRef(null);
 
     useEffect(() => {
-        // Get the height of the container
+        scrollToBottom();
+    }, []);
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messageHistory]);
+
+    const scrollToBottom = async () => {
         const containerHeight = containerRef.current.scrollHeight;
-        containerRef.current.scrollTo({
+        await containerRef.current.scrollTo({
             top: containerHeight,
-            behavior: 'smooth', // You can use 'auto' for instant scrolling
-        });
-    }, [messageHistory])
+            behavior: 'instant',
+        })
+    };
+
     const handleSubmit = () => {
         if (message.length === 0) return;
         if (message.length > 512) return;
@@ -159,108 +161,171 @@ export const ChatComponent = () => {
             message
         });
         setMessage("");
-
-
     };
-    const listMessage = messageHistory.map((message) =>
-        <h1>{message.content}</h1>
-    )
-    function convertTimestampToHHMM(timestamp) {
-        const date = new Date(timestamp);
-
-        const hours = date.getUTCHours();
-        const minutes = date.getUTCMinutes();
-
-        // Format the hours and minutes with leading zeros if needed
-        const formattedHours = hours < 10 ? '0' + hours : hours;
-        const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
-
-        return `${formattedHours}:${formattedMinutes}`;
-    }
-    const heightStyle = {
-        height: '100vh'
-    }
     const handleKeyPress = (e) => {
-        if (e.key === 'Enter') {
-            handleSubmit()
+        handleSubmit()
+    };
+    function formatTime(timestamp) {
+        const date = new Date(timestamp);
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const formattedTime = `${hours}:${minutes}`;
+        return formattedTime
+    }
+    const fileInputRef = useRef(null);
+    const handleFileChange = (e) => {
+        const selectedFile = e.target.files[0];
+
+        if (selectedFile) {
+            uploadDocument(selectedFile)
         }
     };
+    async function uploadDocument(fileName) {
+        const apiEndpoint = `http://${apiUrl}documentUpload/`;
 
+        const form_Data = new FormData()
+        form_Data.append("image", fileName)
+
+        await fetch(apiEndpoint, {
+            method: 'PUT',
+            body: form_Data
+
+        })
+            .then(response => response.json())
+            .then(data => {
+                let file_url = data.response[0].file.file
+                sendJsonMessage({
+                    type: "file",
+                    file_url
+                })
+            })
+            .catch(error => {
+                console.error('API Error:', error);
+            });
+    }
+
+    async function fetchUser() {
+        let name = GetName()
+        const res = await fetch(`http://${apiUrl}GetSingleUser/${name}`, {
+            headers: {
+                Authorization: `Token ${user?.token}`
+            },
+        });
+        const data = await res.json();
+        setUserImage(`http://` + apiUrl + data.user_image)
+    }
+    const handleImageClick = (imageUrl) => {
+        window.open(imageUrl, '_blank');
+    };
     return (
         <>
-            <div className="chat" style={heightStyle}>
-                {/* <button onClick={() => test()}>Test</button> */}
-                <div className="chat-header clearfix">
+            <div className="chat" >
+                <div className="chat-header clearfix" style={{ backgroundColor: "whitesmoke", height: '65px' }}>
                     <div className="row">
                         <div className="col-lg-6">
                             <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
-
-                                {/* <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar" /> */}
                             </a>
                             <div className="chat-about" style={{ display: "flex" }}>
-                                <Avatar
+                                {/* <Avatar
                                     name={GetName()}
                                     round={true} // Optional: Makes the avatar round
                                     size="30"   // Optional: Set the size of the avatar
-                                />&nbsp;&nbsp;
-                                <h6 style={{ padding: "5px" }} className="m-b-0">{GetName()}</h6>
-                                {/* <small>Last seen: 2 hours ago</small> */}
+                                /> */}
+                                <img src={userImage} />
+
+                                &nbsp;&nbsp;
+                                <h6 style={{ padding: "5px", textTransform: 'uppercase' }} className="m-b-0">{GetName()}</h6>
+
+                                {
+                                    participants.includes(GetName()) ?
+                                        <p style={{
+                                            position: "abselute",
+                                            width: "10px",
+                                            height: "10px",
+                                            backgroundColor: "rgb(41 122 40)",
+                                            borderRadius: "50%",
+                                            marginTop: '8%'
+                                        }}></p> : ""
+                                }
+
                             </div>
                         </div>
-                        {/* <div className="col-lg-6 hidden-sm text-right">
-                            <a href="javascript:void(0);" className="btn btn-outline-secondary"><i className="fa fa-camera"></i></a>
-                            <a href="javascript:void(0);" className="btn btn-outline-primary"><i className="fa fa-image"></i></a>
-                            <a href="javascript:void(0);" className="btn btn-outline-info"><i className="fa fa-cogs"></i></a>
-                            <a href="javascript:void(0);" className="btn btn-outline-warning"><i className="fa fa-question"></i></a>
-                        </div> */}
                     </div>
                 </div>
+                {/* <p style={{ display: loading ? 'block' : 'none' }}>loading...</p> */}
                 <div className="chat-history" ref={containerRef} style={{
                     height: '70vh',
                     width: '100%',
                     overflow: 'auto',
                     border: '1px solid #C0C0C0',
+                    backgroundColor: '#e3e3e3',
+                    borderRadius: "30px",
+                    // backgroundImage: 'url("https://img.freepik.com/premium-vector/social-networks-dating-apps-vector-seamless-pattern_341076-469.jpg?size=626&ext=jpg&ga=GA1.1.1797623307.1703658064&semt=ais")'
+                    // display: loading ? "none" : 'block'
                 }}>
                     <ul className="m-b-0">
-                        {reverced_messageHistory.map((message) => (
-                            <li className="clearfix">
-                                <div className={message.from_user.username == user.username ? "message-data text-right" : "message-data"}>
-                                    {/* <span className="message-data-time">{convertTimestampToHHMM(message.timestamp)}</span> */}
-                                    {/* <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar" /> */}
-                                </div>
-                                <div className={message.from_user.username == user.username ? "message other-message float-right" : "message my-message"}   > {message.content}<br></br>
+                        {reverced_messageHistory.map((message, index) => (
+                            <li className="clearfix" key={index}>
+                                <div>
+                                    <div style={{ padding: "5px 20px", wordBreak: "break-word", backgroundColor: message.from_user.username === user.username ? "rgb(133 196 235)" : "#f3f3f3" }} className={message.from_user.username === user.username ? "message other-message float-right" : "message my-message"}>
+                                        {message.content == "" ?
+                                            <img onClick={() => handleImageClick('http://127.0.0.1:8000' + message.file)} style={{ height: "150px", cursor: "pointer" }} src={'http://127.0.0.1:8000' + message.file} />
+                                            :
+                                            message.content}
 
+                                        <br />
+                                        <span style={{ fontSize: "10px", alignSelf: "flex-end", width: '170px', textAlign: "end" }} className={message.from_user.username === user.username ? "message-data-time float-right" : "message-data-time float-right"}>
+                                            <div style={{ display: "flex", float: 'right' }}>
+                                                <span style={{ marginLeft: '5px', display: message.from_user.username === user.username ? "block" : "none" }}>✓</span>
+                                                <span style={{ marginLeft: '-3px', color: 'green', float: 'right', display: message.read == true && message.from_user.username === user.username ? 'block' : 'none' }}>✓</span>
+                                            </div>
+                                            {formatTime(message.timestamp)}
+                                        </span>
+                                    </div>
                                 </div>
                             </li>
                         ))}
-
-                        {/* <li className="clearfix">
-                            <div className="message-data text-right">
-                                <span className="message-data-time">10:10 AM, Today</span>
-                                <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar" />
-                            </div>
-                            <div className="message other-message float-right"> Hi Aiden, how are you? How is the project coming along? </div>
-                        </li>
-                        <li className="clearfix">
-                            <div className="message-data">
-                                <span className="message-data-time">10:12 AM, Today</span>
-                            </div>
-                            <div className="message my-message">Are we meeting today?</div>
-                        </li>
-                        <li className="clearfix">
-                            <div className="message-data">
-                                <span className="message-data-time">10:15 AM, Today</span>
-                            </div>
-                            <div className="message my-message">Project has been already finished and I have results to show you.</div>
-                        </li> */}
                     </ul>
                 </div>
-                <div className="chat-message clearfix">
-                    <div className="input-group mb-0">
-                        <input onKeyPress={handleKeyPress} value={message} onChange={(e) => setMessage(e.target.value)} type="text" className="form-control" placeholder="Enter text here..." />
-                        <div className="input-group-prepend">
-                            <span className="input-group-text" onClick={() => { handleSubmit() }}><i className="fa fa-send"></i></span>
-                        </div>
+                <div className="input-group mb-0" style={{ flexWrap: "unset" }}>
+                    <InputEmoji
+                        cleanOnEnter
+                        onChange={setMessage}
+                        onEnter={handleKeyPress}
+                        value={message}
+                        type="text"
+                        className="form-control"
+                        placeholder="Enter text here..."
+                        style={{ backgroundColor: 'white' }}
+                    />
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleFileChange}
+                        accept="image/png, image/jpeg"
+                    />
+                    <div className="input-group-prepend" style={{ padding: '2px' }}>
+
+                        <span style={{
+                            backgroundColor: "white",
+                            padding: "5px",
+                            marginTop: '10px',
+                            cursor: 'pointer',
+                            border: 'none',
+                        }}
+                            onClick={() => {
+                                fileInputRef.current.click();
+                            }} class="material-symbols-outlined">
+                            attachment
+                        </span>
+                    </div>
+
+                    <div className="input-group-prepend" style={{ padding: '2px' }}>
+                        <span style={{ marginTop: '10px', cursor: 'pointer', padding: "5px" }}
+                            onClick={() => { handleSubmit() }} class="material-symbols-outlined">
+                            send
+                        </span>
                     </div>
                 </div>
             </div>
