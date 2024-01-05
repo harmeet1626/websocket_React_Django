@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react"
 import { useParams } from "react-router-dom"
-import Avatar from 'react-avatar';
 import AuthService from '../auth/AuthService';
 import InputEmoji from 'react-input-emoji'
 import useWebSocket, { ReadyState } from "react-use-websocket";
@@ -14,7 +13,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import { BsTrash } from 'react-icons/bs';
-import { BiSolidAddToQueue, BiDotsVerticalRounded } from "react-icons/bi";
+import { BiSolidAddToQueue } from "react-icons/bi";
 import Button from "react-bootstrap/esm/Button";
 import { useDispatch } from "react-redux";
 import { fetchGroups } from "../store/chatListing";
@@ -313,8 +312,8 @@ export const GroupChat = () => {
                                                             <p style={{ marginTop: "auto", color: u.username == user.username ? 'rgb(41, 155, 211)' : null }}>{u.username}</p>
                                                             {u.username === groupAdmin && <span style={{ fontSize: '10px', color: 'green' }}>&nbsp; admin</span>}
                                                             <span style={{ color: u.username === user.username ? 'green' : 'black', fontSize: u.username === groupAdmin ? 'small' : 'inherit' }}>
-                                                                {user.username === groupAdmin ?
-                                                                    <Dropdown>
+                                                                {user.username === groupAdmin && user.username !== u.username ?
+                                                                    <Dropdown style={{ border: 'none', marginLeft: '5px' }}>
                                                                         <Dropdown.Toggle
                                                                             id="dropdown-basic-button"
                                                                             variant="transparent"
@@ -327,7 +326,7 @@ export const GroupChat = () => {
                                                                         >
                                                                         </Dropdown.Toggle>
 
-                                                                        <Dropdown.Menu>
+                                                                        <Dropdown.Menu style={{ backgroundColor: 'rgb(227, 227, 227)', border: 'none' }}>
                                                                             <Dropdown.Item onClick={() => removeFromGroup(u)}>
                                                                                 <div className="d-flex align-items-center">
                                                                                     <p style={{ margin: '0' }}>Remove From group</p>
@@ -360,9 +359,6 @@ export const GroupChat = () => {
 
                                                         {u.username !== user.username && groupAdmin == user.username && (
                                                             <div>
-                                                                {/* <span style={{ cursor: 'pointer' }} class="material-symbols-outlined">
-                                                                    more_vert
-                                                                </span> */}
 
                                                             </div>
                                                         )}
@@ -381,50 +377,50 @@ export const GroupChat = () => {
                                                 .map((u) => (
                                                     <div>
                                                         <ListGroup.Item style={{ textTransform: 'uppercase' }} key={u.username} className="d-flex justify-content-between align-items-center">
-                                                            <span>{u.username} {u.username === user.username ? "(You)" : null}</span>
-                                                            {u.username !== user.username && (
-                                                                <div>
-                                                                    <Dropdown>
-                                                                        <Dropdown.Toggle
-                                                                            id="dropdown-basic-button"
-                                                                            variant="transparent"
-                                                                            style={{
-                                                                                padding: '0',
-                                                                                border: 'none',
-                                                                                background: 'none',
-                                                                                cursor: 'pointer',
-                                                                            }}
-                                                                        >
-                                                                            <BiDotsVerticalRounded />
-                                                                        </Dropdown.Toggle>
+                                                            <span style={{ display: 'flex', }}>{u.username} {u.username === user.username ? "(You)" : null}
+                                                                <span style={{ color: u.username === user.username ? 'green' : 'black', fontSize: u.username === groupAdmin ? 'small' : 'inherit' }}>
+                                                                    {user.username === groupAdmin && user.username !== u.username ?
+                                                                        <Dropdown style={{ border: 'none', marginLeft: '5px' }}>
+                                                                            <Dropdown.Toggle
+                                                                                id="dropdown-basic-button"
+                                                                                variant="transparent"
+                                                                                style={{
+                                                                                    padding: '2px',
+                                                                                    border: 'none',
+                                                                                    background: 'none',
+                                                                                    cursor: 'pointer',
+                                                                                }}
+                                                                            >
+                                                                            </Dropdown.Toggle>
 
-                                                                        <Dropdown.Menu>
-                                                                            <Dropdown.Item onClick={() => addUserToGroup(u)}>
-                                                                                <div className="d-flex align-items-center">
-                                                                                    <p style={{ margin: '0' }}>
-                                                                                        Add to group</p>
-                                                                                    <span
-                                                                                        style={{
-                                                                                            cursor: 'pointer',
-                                                                                            borderRadius: '5px',
-                                                                                            marginLeft: '10px', // Adjust margin as needed
-                                                                                        }}
-                                                                                        className="material-symbols-outlined"
-                                                                                    >
-                                                                                        <BiSolidAddToQueue />
-                                                                                    </span>
-                                                                                </div>
-                                                                            </Dropdown.Item>
-                                                                        </Dropdown.Menu>
-                                                                    </Dropdown>
-                                                                </div>
-                                                            )}
+                                                                            <Dropdown.Menu style={{ backgroundColor: 'rgb(227, 227, 227)', border: 'none' }}>
+                                                                                <Dropdown.Item onClick={() => addUserToGroup(u)}>
+                                                                                    <div className="d-flex align-items-center">
+                                                                                        <p style={{ margin: '0' }}>
+                                                                                            Add to group</p>
+                                                                                        <span
+                                                                                            style={{
+                                                                                                cursor: 'pointer',
+                                                                                                borderRadius: '5px',
+                                                                                                marginLeft: '10px',
+                                                                                            }}
+                                                                                            className="material-symbols-outlined"
+                                                                                        >
+                                                                                            <BiSolidAddToQueue />
+                                                                                        </span>
+                                                                                    </div>
+                                                                                </Dropdown.Item>
+                                                                            </Dropdown.Menu>
+                                                                        </Dropdown>
+                                                                        : null}
+                                                                </span>
+                                                            </span>
                                                         </ListGroup.Item>
                                                     </div>
                                                 ))}
                                         </Accordion.Body>
                                     </Accordion.Item>
-                                    : ""}
+                                    : null}
                             </Accordion>
                         </Tab>
                         <Tab eventKey="profile" title="About">
@@ -454,19 +450,6 @@ export const GroupChat = () => {
                                         </InputGroup>
                                     </Accordion.Body>
                                 </Accordion.Item>
-                                {/* <Accordion.Item eventKey="1">
-                                    <Accordion.Header>Created By</Accordion.Header>
-                                    <Accordion.Body>
-                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                                        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-                                        minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                                        aliquip ex ea commodo consequat. Duis aute irure dolor in
-                                        reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-                                        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-                                        culpa qui officia deserunt mollit anim id est laborum.
-                                    </Accordion.Body>
-                                </Accordion.Item> */}
-
                             </Accordion>
                         </Tab>
                         <Tab eventKey="media" title="media" style={{ padding: "10px" }}>
@@ -497,11 +480,7 @@ export const GroupChat = () => {
                             <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
                             </a>
                             <div className="chat-about" style={{ display: "flex" }}>
-                                {/* <Avatar
-                                    name={params.groupName}
-                                    round={true}
-                                    size="30"
-                                /> */}
+
                                 <img src={groupImage} />
 
                                 &nbsp;&nbsp;
