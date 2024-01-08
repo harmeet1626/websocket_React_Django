@@ -5,7 +5,7 @@ import AuthService from '../auth/AuthService';
 import Avatar from 'react-avatar';
 import InputEmoji from 'react-input-emoji'
 
-export const ChatComponent = () => {
+export const ChatComponent = (props) => {
 
     const [welcomeMessage, setWelcomeMessage] = useState("");
     const [messageHistory, setMessageHistory] = useState([]);
@@ -26,6 +26,8 @@ export const ChatComponent = () => {
     const location = useLocation()
 
     const { conversationName } = useParams();
+    const [userImage, setUserImage] = useState('')
+
     const [loading, setLoading] = useState(true)
     function GetName() {
         const fullName = conversationName;
@@ -38,13 +40,7 @@ export const ChatComponent = () => {
             return filteredNameArray[1]
         }
     }
-    useEffect(() => {
-
-    }, [reverced_messageHistory])
-
     const apiUrl = process.env.REACT_APP_API_BASE_URL;
-
-
     const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://${apiUrl}chats/${conversationName}/` : null, {
         queryParams: {
             token: user ? user.token : "",
@@ -67,9 +63,12 @@ export const ChatComponent = () => {
                     const fileUrlOrIdentifier = data.file_url_or_identifier;
                     break;
                 case "chat_message_echo":
+                    console.log('chat_message_echo', data.message)
                     setMessageHistory((prev) => [data.message, ...prev]);
                     sendJsonMessage({ type: "read_messages" });
                     break;
+                case "read_messages":
+                    console.log("read_messages")
                 case "last_50_messages":
                     setMessageHistory(data.messages);
                     setHasMoreMessages(data.has_more);
@@ -119,6 +118,7 @@ export const ChatComponent = () => {
     }
     useEffect(() => {
         fetchConversation();
+        fetchUser()
     }, [conversationName, user]);
 
     const connectionStatus = {
@@ -204,6 +204,19 @@ export const ChatComponent = () => {
             });
     }
 
+    async function fetchUser() {
+        let name = GetName()
+        const res = await fetch(`http://${apiUrl}GetSingleUser/${name}`, {
+            headers: {
+                Authorization: `Token ${user?.token}`
+            },
+        });
+        const data = await res.json();
+        setUserImage(`http://` + apiUrl + data.user_image)
+    }
+    const handleImageClick = (imageUrl) => {
+        window.open(imageUrl, '_blank');
+    };
     return (
         <>
             <div className="chat" >
@@ -213,11 +226,14 @@ export const ChatComponent = () => {
                             <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
                             </a>
                             <div className="chat-about" style={{ display: "flex" }}>
-                                <Avatar
+                                {/* <Avatar
                                     name={GetName()}
                                     round={true} // Optional: Makes the avatar round
                                     size="30"   // Optional: Set the size of the avatar
-                                />&nbsp;&nbsp;
+                                /> */}
+                                <img src={userImage} />
+
+                                &nbsp;&nbsp;
                                 <h6 style={{ padding: "5px", textTransform: 'uppercase' }} className="m-b-0">{GetName()}</h6>
 
                                 {
@@ -243,20 +259,17 @@ export const ChatComponent = () => {
                     overflow: 'auto',
                     border: '1px solid #C0C0C0',
                     backgroundColor: '#e3e3e3',
-                    borderRadius: "30px"
+                    borderRadius: "30px",
+                    // backgroundImage: 'url("https://img.freepik.com/premium-vector/social-networks-dating-apps-vector-seamless-pattern_341076-469.jpg?size=626&ext=jpg&ga=GA1.1.1797623307.1703658064&semt=ais")'
                     // display: loading ? "none" : 'block'
                 }}>
                     <ul className="m-b-0">
                         {reverced_messageHistory.map((message, index) => (
                             <li className="clearfix" key={index}>
                                 <div>
-                                    <div style={{ padding: "5px 20px", wordBreak:"break-word" ,backgroundColor: message.from_user.username === user.username ? "rgb(133 196 235)" : "#f3f3f3" }} className={message.from_user.username === user.username ? "message other-message float-right" : "message my-message"}>
+                                    <div style={{ padding: "5px 20px", wordBreak: "break-word", backgroundColor: message.from_user.username === user.username ? "rgb(133 196 235)" : "#f3f3f3" }} className={message.from_user.username === user.username ? "message other-message float-right" : "message my-message"}>
                                         {message.content == "" ?
-
-                                            // <a href={'http://127.0.0.1:8000'+message.file} target="_blank" rel="noopener noreferrer">
-                                            //     View Document
-                                            // </a>
-                                            <img style={{ height: "150px" }} src={'http://127.0.0.1:8000' + message.file} />
+                                            <img onClick={() => handleImageClick('http://127.0.0.1:8000' + message.file)} style={{ height: "150px", cursor: "pointer" }} src={'http://127.0.0.1:8000' + message.file} />
                                             :
                                             message.content}
 
@@ -274,9 +287,7 @@ export const ChatComponent = () => {
                         ))}
                     </ul>
                 </div>
-
-
-                <div className="input-group mb-0">
+                <div className="input-group mb-0" style={{ flexWrap: "unset" }}>
                     <InputEmoji
                         cleanOnEnter
                         onChange={setMessage}
@@ -295,29 +306,25 @@ export const ChatComponent = () => {
                         accept="image/png, image/jpeg"
                     />
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
-                        <span
-                            className="input-group-text rounded-circle"
-                            style={{
-                                backgroundColor: "white",
-                                marginTop: '6px',
-                                cursor: 'pointer',
-                                border: 'none',
-                            }}
+
+                        <span style={{
+                            backgroundColor: "white",
+                            padding: "5px",
+                            marginTop: '10px',
+                            cursor: 'pointer',
+                            border: 'none',
+                        }}
                             onClick={() => {
                                 fileInputRef.current.click();
-                            }}
-                        >
-                            <i className="fa fa-paperclip" style={{ color: '#555' }}></i> {/* Adjust the color of the paperclip icon */}
+                            }} class="material-symbols-outlined">
+                            attachment
                         </span>
                     </div>
 
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
-                        <span
-                            className="input-group-text rounded-circle"  // Add the rounded-circle class
-                            style={{ backgroundColor: "rgb(87 145 255)", marginTop: '6px', cursor: 'pointer' }}
-                            onClick={() => { handleSubmit() }}
-                        >
-                            <i className="fa fa-send"></i>
+                        <span style={{ marginTop: '10px', cursor: 'pointer', padding: "5px" }}
+                            onClick={() => { handleSubmit() }} class="material-symbols-outlined">
+                            send
                         </span>
                     </div>
                 </div>
