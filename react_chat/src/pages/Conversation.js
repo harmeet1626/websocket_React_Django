@@ -286,7 +286,7 @@ export const Conversation = () => {
                                                                 round={true} // Optional: Makes the avatar round
                                                                 size="30"   // Optional: Set the size of the avatar
                                                             /> */}
-                                                            <img style={{ height: '40px', width: "40px" }} src={user.user_picture} />
+                                                            <img style={{ height: '40px', width: "40px" }} src={`http://${apiUrl}`+user.user_picture} />
                                                             &nbsp;&nbsp;
                                                             <p style={{ padding: "5px" }} className="name">{user.username}</p>
                                                         </div>
