@@ -12,6 +12,7 @@ from chats.paginators import MessagePagination
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
 from django.contrib.auth.hashers import make_password
 from datetime import date
+from rest_framework.views import APIView
 
 
 
@@ -263,3 +264,14 @@ class UpdateUserImage(UpdateAPIView):
         serializer.save(user=user_instance)
         return Response("Image updated")
 
+class GetCurrentUser(APIView):
+    def get(self, request, *args, **kwargs):
+        # Check if the user is authenticated
+        print(request.user)
+        if request.user.is_authenticated:
+            # Access the current logged-in user
+            current_user = request.user
+            # Now you can use the 'current_user' object as needed
+            return Response(current_user.username)
+        else:
+            return Response({"message": "User is not authenticated"})
