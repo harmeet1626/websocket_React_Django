@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
-import axios from 'axios'
+import { toast } from 'react-toastify';
 import {
     MDBBtn,
     MDBContainer,
@@ -22,6 +22,25 @@ function Login() {
         await AuthService.login(userName, password).then((res) => {
             if (res?.username) {
                 navigate('/')
+                toast.success('Logged in successfully!', {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
+                return
+            }
+            else{
+                toast.error('Invalid creadentials!', {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
             }
         })
     }

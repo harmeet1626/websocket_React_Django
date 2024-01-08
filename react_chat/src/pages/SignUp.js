@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { toast } from 'react-toastify';
 import axios from 'axios';
 import {
     MDBBtn,
@@ -39,8 +40,18 @@ function SignUp() {
 
             handleImageUpload();
 
+
         } catch (error) {
+
             console.error('Error creating user:', error);
+            toast.error(error, {
+                position: 'top-right',
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+            });
         }
     }
 
@@ -55,9 +66,25 @@ function SignUp() {
                 .then(response => response.json())
                 .then(data => {
                     navigate('/login');
+                    toast.success('You have signed up successfully!', {
+                        position: 'top-right',
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                    });
                 })
                 .catch(error => {
                     console.error('Error uploading image', error);
+                    toast.error('Some error occured ', {
+                        position: 'top-right',
+                        autoClose: 3000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                    });
                 });
         }
     };
