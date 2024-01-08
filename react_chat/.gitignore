@@ -22,3 +22,6 @@ yarn-debug.log*
 yarn-error.log*
 
 react_chat/src/pages/Chat_test.js
+
+django_chat/__pycache__/
+*.pyc
