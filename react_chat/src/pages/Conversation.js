@@ -173,6 +173,7 @@ export const Conversation = () => {
         }
     };
 
+
     return (
 
         <div className="row clearfix" >
@@ -225,18 +226,11 @@ export const Conversation = () => {
                     </Modal.Footer>
                 </Modal>
                 <div className="card chat-app" style={{ backgroundColor: "whitesmoke", display: "flex" }}>
-
-                    <div id="plist" className="people-list"  >
-                        <div>
+                    <div id="plist" className="people-list" style={{ overflowY: 'auto', maxHeight: '100vh' }} >
+                        <div >
                             <div className="input-group" style={{ flexWrap: 'inherit' }}>
-
-                                {/* <span style={{ marginTop: '5px' }} class="material-symbols-outlined">
-                                    search
-                                </span> */}
-
                                 <input style={inputStyle} placeholder='search user' value={searchTerm}
                                     onChange={handleSearch} />
-
                             </div>
                             <ul className="list-unstyled chat-list mt-2 mb-0" >
                                 <div style={{ display: "flex", marginTop: "3vh" }}>
@@ -244,7 +238,7 @@ export const Conversation = () => {
                                     <span style={{ paddingLeft: "5px" }} class="material-symbols-outlined">
                                         groups
                                     </span>
-                                    <span onClick={handleShow} style={{ marginLeft: '20vh', cursor: 'pointer' }} class="material-symbols-outlined">
+                                    <span onClick={handleShow} style={{ marginLeft: 'auto', cursor: 'pointer' }} class="material-symbols-outlined">
                                         add_box
                                     </span>
                                 </div>
@@ -286,7 +280,7 @@ export const Conversation = () => {
                                                                 round={true} // Optional: Makes the avatar round
                                                                 size="30"   // Optional: Set the size of the avatar
                                                             /> */}
-                                                            <img style={{ height: '40px', width: "40px" }} src={`http://${apiUrl}`+user.user_picture} />
+                                                            <img style={{ height: '40px', width: "40px" }} src={`http://${apiUrl}` + user.user_picture} />
                                                             &nbsp;&nbsp;
                                                             <p style={{ padding: "5px" }} className="name">{user.username}</p>
                                                         </div>

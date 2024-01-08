@@ -252,7 +252,6 @@ export const ChatComponent = (props) => {
                         </div>
                     </div>
                 </div>
-                {/* <p style={{ display: loading ? 'block' : 'none' }}>loading...</p> */}
                 <div className="chat-history" ref={containerRef} style={{
                     height: '70vh',
                     width: '100%',
@@ -260,8 +259,6 @@ export const ChatComponent = (props) => {
                     border: '1px solid #C0C0C0',
                     backgroundColor: '#e3e3e3',
                     borderRadius: "30px",
-                    // backgroundImage: 'url("https://img.freepik.com/premium-vector/social-networks-dating-apps-vector-seamless-pattern_341076-469.jpg?size=626&ext=jpg&ga=GA1.1.1797623307.1703658064&semt=ais")'
-                    // display: loading ? "none" : 'block'
                 }}>
                     <ul className="m-b-0">
                         {reverced_messageHistory.map((message, index) => (
