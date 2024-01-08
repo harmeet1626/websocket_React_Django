@@ -16,7 +16,6 @@ class UserSerializer(serializers.ModelSerializer):
     def get_user_picture(self, instance):
         try:
             user_image = instance.user_image
-            print(str(user_image.image),"user image >>>>>>>>>>>>>>>>>>>")
             return str(user_image.image)
         except:
             # Return a default image URL or None if no user image is available

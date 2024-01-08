@@ -308,7 +308,7 @@ export const GroupChat = () => {
                                                     <div style={{ textTransform: 'uppercase', padding: '10px' }}
                                                         key={u.username} className="d-flex justify-content-between align-items-center">
                                                         <span style={{ display: 'flex' }}>
-                                                            <img style={{ height: '30px', width: "30px", borderRadius: '10px' }} src={'http://127.0.0.1:8000/' + u.user_image} /> &nbsp;&nbsp;
+                                                            <img style={{ height: '30px', width: "30px", borderRadius: '10px' }} src={'http://' + u.user_image} /> &nbsp;&nbsp;
                                                             <p style={{ marginTop: "auto", color: u.username == user.username ? 'rgb(41, 155, 211)' : null }}>{u.username}</p>
                                                             {u.username === groupAdmin && <span style={{ fontSize: '10px', color: 'green' }}>&nbsp; admin</span>}
                                                             <span style={{ color: u.username === user.username ? 'green' : 'black', fontSize: u.username === groupAdmin ? 'small' : 'inherit' }}>
@@ -497,8 +497,8 @@ export const GroupChat = () => {
                                 {reverced_messageHistory
                                     .filter((u) => u.file !== "")
                                     .map((u, index) => (
-                                        <div key={index} onClick={() => handleImageClick('http://127.0.0.1:8000' + u.file)}>
-                                            <img style={{ height: "50px", width: "80px", cursor: 'pointer' }} src={'http://127.0.0.1:8000' + u.file} alt={`Image ${index}`} />
+                                        <div key={index} onClick={() => handleImageClick('http://web-chatapplication.softprodigyphp.in' + u.file)}>
+                                            <img style={{ height: "50px", width: "80px", cursor: 'pointer' }} src={'http://web-chatapplication.softprodigyphp.in' + u.file} alt={`Image ${index}`} />
                                         </div>
                                     ))}
                             </div>
@@ -549,7 +549,7 @@ export const GroupChat = () => {
                                             <div style={{ fontWeight: "bold", color: 'maroon', textTransform: 'capitalize', fontSize: '12px', height: '20px' }}>{message.from_user_id}</div>
                                         }
                                         {message.content == "" ?
-                                            <img onClick={() => handleImageClick(`http://127.0.0.1:8000` + message.file)} style={{ height: "150px", cursor: 'pointer' }} src={'http://127.0.0.1:8000' + message.file} />
+                                            <img onClick={() => handleImageClick(`http://web-chatapplication.softprodigyphp.in` + message.file)} style={{ height: "150px", cursor: 'pointer' }} src={'http://web-chatapplication.softprodigyphp.in' + message.file} />
                                             :
                                             message.content
                                         }
