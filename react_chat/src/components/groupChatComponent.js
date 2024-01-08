@@ -139,7 +139,7 @@ export const GroupChat = () => {
     };
 
     async function fetchParticipants() {
-        const res = await fetch(`http://${apiUrl}GetGroupParticipants/${params.groupName}`, {
+        const res = await fetch(`http://${apiUrl}GetGroupParticipants/${params?.groupName}`, {
             method: "GET",
         });
         const data = await res.json();
