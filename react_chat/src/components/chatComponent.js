@@ -11,22 +11,15 @@ export const ChatComponent = (props) => {
     const reverced_messageHistory = [...messageHistory].reverse()
     const [message, setMessage] = useState("");
     const [user, setUser] = useState(() => AuthService.getCurrentUser())
-
     const [page, setPage] = useState(2);
     const [hasMoreMessages, setHasMoreMessages] = useState(false);
-
     const [participants, setParticipants] = useState([]);
-
     const [conversation, setConversation] = useState(null);
-
     const [typing, setTyping] = useState(false);
-
     const [userActive, setUserActive] = useState(false)
     const location = useLocation()
-
     const { conversationName } = useParams();
     const [userImage, setUserImage] = useState('')
-
     const [loading, setLoading] = useState(true)
     function GetName() {
         const fullName = conversationName;
@@ -34,7 +27,6 @@ export const ChatComponent = (props) => {
         const filteredNameArray = nameArray.filter(part => part.trim() !== "");
         if (filteredNameArray[1] == user?.username) {
             return filteredNameArray[0]
-
         } else {
             return filteredNameArray[1]
         }
@@ -89,12 +81,10 @@ export const ChatComponent = (props) => {
                 case "online_user_list":
                     setParticipants(data.users);
                     break;
-
                 case 'typing':
                     console.log('user typing')
                     // updateTyping(data);
                     break;
-
                 default:
                     console.error("Unknown message type!");
                     break;
@@ -119,7 +109,6 @@ export const ChatComponent = (props) => {
         fetchConversation();
         fetchUser()
     }, [conversationName, user]);
-
     const connectionStatus = {
         [ReadyState.CONNECTING]: "Connecting",
         [ReadyState.OPEN]: "Open",
@@ -151,7 +140,6 @@ export const ChatComponent = (props) => {
             behavior: 'instant',
         })
     };
-
     const handleSubmit = () => {
         if (message.length === 0) return;
         if (message.length > 512) return;
@@ -202,7 +190,6 @@ export const ChatComponent = (props) => {
                 console.error('API Error:', error);
             });
     }
-
     async function fetchUser() {
         let name = GetName()
         const res = await fetch(`http://${apiUrl}GetSingleUser/${name}`, {
@@ -229,10 +216,8 @@ export const ChatComponent = (props) => {
                             </a>
                             <div className="chat-about" style={{ display: "flex" }}>
                                 <img src={userImage} />
-
                                 &nbsp;&nbsp;
                                 <h6 style={{ padding: "5px", textTransform: 'uppercase' }} className="m-b-0">{GetName()}</h6>
-
                                 {
                                     participants.includes(GetName()) ?
                                         <p style={{
@@ -265,7 +250,6 @@ export const ChatComponent = (props) => {
                                             <img onClick={() => handleImageClick(`http://${RemoveSlash(apiUrl)}` + message.file)} style={{ height: "150px", cursor: "pointer" }} src={`http://${apiUrl}/` + message.file} />
                                             :
                                             message.content}
-
                                         <br />
                                         <span style={{ fontSize: "10px", alignSelf: "flex-end", width: '170px', textAlign: "end" }} className={message.from_user.username === user.username ? "message-data-time float-right" : "message-data-time float-right"}>
                                             <div style={{ display: "flex", float: 'right' }}>
@@ -299,7 +283,6 @@ export const ChatComponent = (props) => {
                         accept="image/png, image/jpeg"
                     />
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
-
                         <span style={{
                             backgroundColor: "white",
                             padding: "5px",
@@ -313,7 +296,6 @@ export const ChatComponent = (props) => {
                             attachment
                         </span>
                     </div>
-
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
                         <span style={{ marginTop: '10px', cursor: 'pointer', padding: "5px" }}
                             onClick={() => { handleSubmit() }} class="material-symbols-outlined">

@@ -21,6 +21,7 @@ export const Conversation = () => {
     const GroupListResponse = useSelector((state) => state.groupList)
     const [activeChat, setActiveChat] = useState()
     const [selectedImage, setSelectedImage] = useState(null);
+    const [homepage, setHomepage] = useState()
 
     function DispatchfetchGroups() {
         dispatch(fetchGroups(`Token ${user?.token}`))
@@ -50,9 +51,6 @@ export const Conversation = () => {
     useEffect(() => {
         fetchUsers();
     }, []);
-
-
-
     useEffect(() => {
         var inputString = location.pathname;
         var splitString = inputString.split('/');
@@ -63,16 +61,8 @@ export const Conversation = () => {
         } else {
             return
         }
-
     }, [location])
-
-
-    const [homepage, setHomepage] = useState()
-
-
-
     useEffect(() => {
-
         if (location.pathname == '/') {
             setHomepage(true)
         }
@@ -137,17 +127,14 @@ export const Conversation = () => {
     const handleSearch = (e) => {
         setSearchTerm(e.target.value);
     };
-
     // Filter array1
     const filteredGroup = groupList.filter((item) =>
         item.groupName.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
     // Filter array2
     const filteredData = users?.filter((item) =>
         item.username.toLowerCase().includes(searchTerm.toLowerCase())
     );
-
     const handleImageChange = (e) => {
         const file = e.target.files[0];
         setSelectedImage(file);
@@ -171,10 +158,7 @@ export const Conversation = () => {
                 });
         }
     };
-
-
     return (
-
         <div className="row clearfix" >
             <div className="col-lg-12">
                 <Modal
@@ -212,11 +196,9 @@ export const Conversation = () => {
                                         disabled={u.username == user.username ? true : false}
                                         onChange={() => handleCheckboxChange(u.username)}
                                     />
-
                                 </div>
                             ))}
                     </Form>
-
                     <Modal.Footer>
                         <Button variant="secondary" onClick={handleClose}>
                             Close
@@ -291,7 +273,6 @@ export const Conversation = () => {
                 </div>
             </div>
         </div>
-
     );
 };
 
