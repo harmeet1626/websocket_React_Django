@@ -3,10 +3,6 @@ from channels.generic.websocket import JsonWebsocketConsumer
 from chats.models import Conversation, Message, Groups, Group_content
 from django.contrib.auth.models import User
 from chats.seriailizers import MessageSerializer, Group_content_serializer
-from channels.db import database_sync_to_async
-from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
-from django.conf import settings
 import json
 from uuid import UUID
 from channels.layers import get_channel_layer

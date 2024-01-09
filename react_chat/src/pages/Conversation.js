@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import AuthService from '../auth/AuthService';
 import '../style/chat.css'
-import Avatar from 'react-avatar';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import InputGroup from 'react-bootstrap/InputGroup';
@@ -248,11 +247,6 @@ export const Conversation = () => {
                                             <div key={index}>
                                                 <li className="clearfix" style={{ borderBottom: "1px solid #ddd", borderRadius: "40px", backgroundColor: activeChat == group.groupName ? "rgb(225 225 225)" : null }}>
                                                     <div className="about" style={{ display: "flex" }}>
-                                                        {/* <Avatar
-                                                            name={group.groupName}
-                                                            round={true} // Optional: Makes the avatar round
-                                                            size="30"   // Optional: Set the size of the avatar
-                                                        /> */}
                                                         <img style={{ height: '40px', width: '40px' }} src={`http://${apiUrl}` + group.groupImage} />
                                                         &nbsp;&nbsp;
                                                         <p style={{ padding: "5px" }} className="name">{group.groupName}</p>
@@ -275,11 +269,6 @@ export const Conversation = () => {
                                                 <div key={index}>
                                                     <li className="clearfix" style={{ borderBottom: "1px solid #ddd", borderRadius: "40px", backgroundColor: activeChat == createConversationName(user.username) ? "rgb(225 225 225)" : null }}>
                                                         <div className="about" style={{ display: "flex" }}>
-                                                            {/* <Avatar
-                                                                name={user.username}
-                                                                round={true} // Optional: Makes the avatar round
-                                                                size="30"   // Optional: Set the size of the avatar
-                                                            /> */}
                                                             <img style={{ height: '40px', width: "40px" }} src={`http://${apiUrl}` + user.user_picture} />
                                                             &nbsp;&nbsp;
                                                             <p style={{ padding: "5px" }} className="name">{user.username}</p>

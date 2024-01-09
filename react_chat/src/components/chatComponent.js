@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import AuthService from '../auth/AuthService';
-import Avatar from 'react-avatar';
 import InputEmoji from 'react-input-emoji'
 
 export const ChatComponent = (props) => {
@@ -229,11 +228,6 @@ export const ChatComponent = (props) => {
                             <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
                             </a>
                             <div className="chat-about" style={{ display: "flex" }}>
-                                {/* <Avatar
-                                    name={GetName()}
-                                    round={true} // Optional: Makes the avatar round
-                                    size="30"   // Optional: Set the size of the avatar
-                                /> */}
                                 <img src={userImage} />
 
                                 &nbsp;&nbsp;
@@ -250,7 +244,6 @@ export const ChatComponent = (props) => {
                                             marginTop: '8%'
                                         }}></p> : ""
                                 }
-
                             </div>
                         </div>
                     </div>

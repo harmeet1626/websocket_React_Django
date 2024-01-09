@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-toastify';
-
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import {
@@ -115,7 +114,7 @@ export default function Navbar() {
                     </div>
                     <div style={{ padding: '10px' }}>
                         <InputGroup className="mb-3">
-                            <InputGroup.Text id="basic-addon1">Username</InputGroup.Text>
+                            <InputGroup.Text id="basic-addon1" style={{ width: '110px' }}>Username</InputGroup.Text>
                             <Form.Control
                                 placeholder="Username"
                                 aria-label="Username"
@@ -125,7 +124,7 @@ export default function Navbar() {
                             />
                         </InputGroup>
                         <InputGroup className="mb-3">
-                            <InputGroup.Text id="basic-addon1">Email</InputGroup.Text>
+                            <InputGroup.Text id="basic-addon1" style={{ width: '110px' }}>Email</InputGroup.Text>
                             <Form.Control
                                 placeholder="Username"
                                 aria-label="Username"
@@ -134,12 +133,14 @@ export default function Navbar() {
                                 disabled={true}
                             />
                         </InputGroup>
+                        <Button variant="danger" onClick={() => {
+                            AuthService.logout()
+                            navigate('/login')
+                            handleClose()
+                        }}>Logout</Button>
                     </div>
                 </div>
             </Modal>
-
-
-
             <MDBNavbar expand='lg' style={{ backgroundColor: "rgb(41 155 211)" }}>
                 <MDBContainer fluid>
                     <MDBNavbarBrand href='#'><span style={{ padding: "2px" }} class="material-symbols-outlined">
@@ -170,22 +171,14 @@ export default function Navbar() {
                                 :
                                 <>
                                     <MDBNavbarItem className='home_button'>
-                                        <MDBNavbarLink href='/'>
+                                        <MDBNavbarLink href='/' style={{ marginTop: "5px" }}>
                                             Home
                                         </MDBNavbarLink>
-                                    </MDBNavbarItem>
-                                    <MDBNavbarItem>
-                                        <MDBNavbarLink onClick={() => {
-                                            AuthService.logout()
-                                            navigate('/login')
-                                        }}>logout</MDBNavbarLink>
                                     </MDBNavbarItem>
                                     <MDBNavbarItem className='ml-auto home_button' style={{ marginLeft: 'auto', cursor: 'pointer' }} onClick={handleShow}>
                                         <MDBNavbarLink style={{ fontWeight: 'bold', textTransform: 'capitalize' }}>< img src={`http://${apiUrl}` + userdetails?.userimage} style={{ height: '35px', width: '35px', borderRadius: "20px" }} /></MDBNavbarLink>
                                     </MDBNavbarItem>
-
                                 </>
-
                             }
 
                         </MDBNavbarNav>

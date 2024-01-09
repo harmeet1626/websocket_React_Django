@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-nmn-#i6wo*2$0&0*+3w&i7a!bdsv=7_!m*_#yfrua9=om*d8bk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+
 
 
 # Application definition
@@ -203,3 +203,4 @@ STATICFILES_DIRS= ['static']
 
 
 
+ALLOWED_HOSTS = ['*']
