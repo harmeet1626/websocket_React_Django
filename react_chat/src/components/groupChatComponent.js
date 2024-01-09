@@ -17,8 +17,6 @@ import Button from "react-bootstrap/esm/Button";
 import { useDispatch } from "react-redux";
 import { fetchGroups } from "../store/chatListing";
 
-
-
 export const GroupChat = () => {
     const params = useParams()
     const apiUrl = process.env.REACT_APP_API_BASE_URL;
@@ -36,9 +34,6 @@ export const GroupChat = () => {
     const [groupImage, setGroupImage] = useState('')
     const [selectedImage, setSelectedImage] = useState(null);
     const dispatch = useDispatch()
-
-
-
     const { readyState, sendJsonMessage } = useWebSocket(user ? `ws://${apiUrl}groupChat/${params.groupName}/`
         : null, {
         queryParams: {
@@ -100,8 +95,6 @@ export const GroupChat = () => {
             }
         }
     });
-
-
     function formatTime(timestamp) {
         const date = new Date(timestamp);
         const hours = date.getHours().toString().padStart(2, '0');
@@ -109,8 +102,6 @@ export const GroupChat = () => {
         const formattedTime = `${hours}:${minutes}`;
         return formattedTime
     }
-
-
     const handleSubmit = () => {
         if (message.length === 0) return;
         if (message.length > 512) return;
@@ -137,7 +128,6 @@ export const GroupChat = () => {
             behavior: 'instant',
         })
     };
-
     async function fetchParticipants() {
         const res = await fetch(`http://${apiUrl}GetGroupParticipants/${params?.groupName}`, {
             method: "GET",
@@ -149,7 +139,6 @@ export const GroupChat = () => {
         setParticipants(data?.Participants)
         setGroupImage(`http://` + apiUrl + data.Group_image)
     }
-
     async function UpdateGroupAdmin(username) {
         const res = await fetch(`http://${apiUrl}UpdatedGroupAdmin/`, {
             method: "PUT",
@@ -168,8 +157,6 @@ export const GroupChat = () => {
     useEffect(() => {
         fetchParticipants()
     }, [params.groupName])
-
-
     async function fetchUsers() {
         const res = await fetch(`http://${apiUrl}users/`, {
             headers: {
@@ -220,7 +207,6 @@ export const GroupChat = () => {
                 group: event.group,
             }),
         };
-
         await fetch(apiEndpoint, requestOptions)
             .then(response => response.json())
             .then(data => {
@@ -233,7 +219,6 @@ export const GroupChat = () => {
             });
 
     }
-
     async function addUserToGroup(event) {
         let user = event.username
         const apiEndpoint = `http://${apiUrl}AddParticipantInGroup/`;
@@ -265,7 +250,6 @@ export const GroupChat = () => {
         const file = e.target.files[0];
         setSelectedImage(file);
     };
-
     const handleImageUpload = async () => {
         if (selectedImage) {
             const form_Data = new FormData()
@@ -315,7 +299,6 @@ export const GroupChat = () => {
                                                             {u.username === groupAdmin && <span style={{ fontSize: '10px', color: 'green' }}>&nbsp; admin</span>}
                                                             <span style={{ color: u.username === user.username ? 'green' : 'black', fontSize: u.username === groupAdmin ? 'small' : 'inherit' }}>
                                                                 {user.username === groupAdmin && user.username !== u.username ?
-
                                                                     <Dropdown style={{ border: 'none', marginLeft: '5px' }}>
                                                                         <Dropdown.Toggle
                                                                             id="dropdown-basic-button"
@@ -328,7 +311,6 @@ export const GroupChat = () => {
                                                                             }}
                                                                         >
                                                                         </Dropdown.Toggle>
-
                                                                         <Dropdown.Menu style={{ backgroundColor: 'rgb(227, 227, 227)', border: 'none' }}>
                                                                             <Dropdown.Item onClick={() => {
                                                                                 removeFromGroup(u);
@@ -371,7 +353,6 @@ export const GroupChat = () => {
                                                                                 }}
                                                                             >
                                                                             </Dropdown.Toggle>
-
                                                                             <Dropdown.Menu style={{ backgroundColor: 'rgb(227, 227, 227)', border: 'none' }}>
                                                                                 <Dropdown.Item disabled={u.username == groupAdmin ? true : false} onClick={() => {
                                                                                     removeFromGroup(u)
@@ -396,12 +377,9 @@ export const GroupChat = () => {
                                                                         null
                                                                 }
                                                             </span>
-
                                                         </span>
-
                                                         {u.username !== user.username && groupAdmin == user.username && (
                                                             <div>
-
                                                             </div>
                                                         )}
                                                     </div>
@@ -414,7 +392,6 @@ export const GroupChat = () => {
                                     <Accordion.Item eventKey="1">
                                         <Accordion.Header>Add Members</Accordion.Header>
                                         <Accordion.Body>
-
                                             <ListGroup >
                                                 {users && users
                                                     .filter((u) => !participants.some((p) => p.username.includes(u.username)))
@@ -428,7 +405,6 @@ export const GroupChat = () => {
                                                                     {u.username === groupAdmin && <span style={{ fontSize: '10px', color: 'green' }}>&nbsp; admin</span>}
                                                                     <span style={{ color: u.username === user.username ? 'green' : 'black', fontSize: u.username === groupAdmin ? 'small' : 'inherit' }}>
                                                                         {user.username === groupAdmin && user.username !== u.username ?
-
                                                                             <Dropdown style={{ border: 'none', marginLeft: '5px' }}>
                                                                                 <Dropdown.Toggle
                                                                                     id="dropdown-basic-button"
@@ -474,7 +450,6 @@ export const GroupChat = () => {
                                                                                         }}
                                                                                     >
                                                                                     </Dropdown.Toggle>
-
                                                                                     <Dropdown.Menu style={{ backgroundColor: 'rgb(227, 227, 227)', border: 'none' }}>
                                                                                         <Dropdown.Item disabled={u.username == groupAdmin ? true : false} onClick={() => {
                                                                                             removeFromGroup(u)
@@ -499,12 +474,9 @@ export const GroupChat = () => {
                                                                                 null
                                                                         }
                                                                     </span>
-
                                                                 </span>
-
                                                                 {u.username !== user.username && groupAdmin == user.username && (
                                                                     <div>
-
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -565,7 +537,6 @@ export const GroupChat = () => {
                             </Tab>
                             : ""}
                     </Tabs>
-
                 </Modal>
                 <div className="chat-header clearfix" style={{ backgroundColor: "whitesmoke", height: '65px' }}>
                     <div className="row">
@@ -573,9 +544,7 @@ export const GroupChat = () => {
                             <a href="javascript:void(0);" data-toggle="modal" data-target="#view_info">
                             </a>
                             <div className="chat-about" style={{ display: "flex" }}>
-
                                 <img src={groupImage} />
-
                                 &nbsp;&nbsp;
                                 <h6 style={{ padding: "5px", textTransform: 'uppercase' }} className="m-b-0">{params.groupName}</h6>
                             </div>
@@ -606,7 +575,6 @@ export const GroupChat = () => {
                                             :
                                             message.content
                                         }
-
                                         <br />
                                         <span style={{ fontSize: "10px", alignSelf: "flex-end", width: '170px', textAlign: "end" }} className={message.from_user_id === user.username ? "message-data-time float-right" : "message-data-time float-right"}>
                                             <div style={{ display: "flex", float: 'right' }}>
@@ -621,8 +589,6 @@ export const GroupChat = () => {
                         ))}
                     </ul>
                 </div>
-
-
                 <div className="input-group mb-0" style={{ flexWrap: "unset" }}>
                     <InputEmoji
                         cleanOnEnter
@@ -642,7 +608,6 @@ export const GroupChat = () => {
                         accept="image/png, image/jpeg"
                     />
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
-
                         <span style={{
                             backgroundColor: "white",
                             padding: "5px",
@@ -656,7 +621,6 @@ export const GroupChat = () => {
                             attachment
                         </span>
                     </div>
-
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
                         <span style={{ marginTop: '10px', cursor: 'pointer', padding: "5px" }}
                             onClick={() => { handleSubmit() }} class="material-symbols-outlined">

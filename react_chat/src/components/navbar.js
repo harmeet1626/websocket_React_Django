@@ -17,7 +17,6 @@ import AuthService from '../auth/AuthService';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useLocation, useNavigate } from 'react-router-dom';
-
 export default function Navbar() {
     const apiUrl = process.env.REACT_APP_API_BASE_URL;
     const [openNav, setOpenNav] = useState(false);
@@ -32,7 +31,6 @@ export default function Navbar() {
     const [selectedImage, setSelectedImage] = useState(null);
     async function getUserApi() {
         if (user && user?.token) {
-
             const res = await fetch(`http://${apiUrl}GetCurrentUser/`, {
                 method: "GET",
                 headers: {
@@ -48,7 +46,6 @@ export default function Navbar() {
     useEffect(() => {
         getUserApi()
     }, [user?.token])
-
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         setSelectedImage(file);
@@ -100,7 +97,6 @@ export default function Navbar() {
                 </Modal.Header>
                 <input ref={fileInputRef} type="file" accept="image/png, image/jpeg" style={{ display: 'none' }}
                     onChange={handleFileChange} />
-
                 <div style={{ display: "flex", padding: '25px' }}>
                     <div style={{ position: 'relative', padding: '10px', height: 'fit-content' }}>
                         <img src={`http://${apiUrl}` + userdetails?.userimage} style={{ borderRadius: "40px", height: '90px', width: '90px' }} />
@@ -167,7 +163,6 @@ export default function Navbar() {
                                         </MDBNavbarLink>
                                     </MDBNavbarItem>
                                 </>
-
                                 :
                                 <>
                                     <MDBNavbarItem className='home_button'>
@@ -180,7 +175,6 @@ export default function Navbar() {
                                     </MDBNavbarItem>
                                 </>
                             }
-
                         </MDBNavbarNav>
                     </MDBCollapse>
                 </MDBContainer>

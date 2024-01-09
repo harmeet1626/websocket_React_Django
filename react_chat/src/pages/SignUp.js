@@ -97,21 +97,17 @@ function SignUp() {
                 <MDBCardBody>
                     <MDBRow>
                         <MDBCol md='10' lg='6' className='order-2 order-lg-1 d-flex flex-column align-items-center'>
-
                             <p classNAme="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
                             <div className="d-flex flex-row align-items-center mb-4 ">
                                 <MDBInput value={username_input} onChange={(e) => setUsername_input(e.target.value)} label='Username' id='form1' type='text' className='w-100' />
                             </div>
-
                             <div className="d-flex flex-row align-items-center mb-4">
                                 <MDBInput value={email_input} onChange={(e) => setEmail_input(e.target.value)} label='Your Email' id='form2' type='email' />
                             </div>
-
                             <div className="d-flex flex-row align-items-center mb-4">
                                 <MDBInput value={password_input} onChange={(e) => setPassword_input(e.target.value)} label='Password' id='form3' type='password' />
                             </div>
                             <div className="d-flex flex-row align-items-center mb-4 ">
-
                                 <div className="" style={{ paddingLeft: "50px" }}>
                                     <h6 for="file-input"> Profile Picture</h6><br></br>
                                     <input type="file" accept="image/*" onChange={handleImageChange} />
@@ -119,17 +115,13 @@ function SignUp() {
                             </div>
                             <MDBBtn onClick={() => createUser()} className='mb-4' size='lg'>Register</MDBBtn>
                         </MDBCol>
-
                         <MDBCol md='10' lg='6' className='order-1 order-lg-2 d-flex align-items-center'>
                             <MDBCardImage src='https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-registration/draw1.webp' fluid />
                         </MDBCol>
-
                     </MDBRow>
                 </MDBCardBody>
             </MDBCard>
-
         </MDBContainer>
     );
 }
-
 export default SignUp;
