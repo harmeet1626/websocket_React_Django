@@ -209,7 +209,6 @@ export const GroupChat = () => {
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
     async function removeFromGroup(event) {
-        console.log(event, "remove from group")
         const apiEndpoint = `http://${apiUrl}RemoveUserFromGroup/`;
         const requestOptions = {
             method: 'PUT',
@@ -285,6 +284,9 @@ export const GroupChat = () => {
                 });
         }
     };
+    function RemoveSlash(str) {
+        return str.slice(0, -1);
+    }
     return (
         <>
             <div className="chat" >
@@ -548,8 +550,8 @@ export const GroupChat = () => {
                                 {reverced_messageHistory
                                     .filter((u) => u.file !== "")
                                     .map((u, index) => (
-                                        <div key={index} onClick={() => handleImageClick('http://web-chatapplication.softprodigyphp.in' + u.file)}>
-                                            <img style={{ height: "50px", width: "80px", cursor: 'pointer' }} src={'http://web-chatapplication.softprodigyphp.in' + u.file} alt={`Image ${index}`} />
+                                        <div key={index} onClick={() => handleImageClick(`http://${RemoveSlash(apiUrl)}` + u.file)}>
+                                            <img style={{ height: "50px", width: "80px", cursor: 'pointer' }} src={`http://${RemoveSlash(apiUrl)}` + u.file} alt={`Image ${index}`} />
                                         </div>
                                     ))}
                             </div>
@@ -600,7 +602,7 @@ export const GroupChat = () => {
                                             <div style={{ fontWeight: "bold", color: 'maroon', textTransform: 'capitalize', fontSize: '12px', height: '20px' }}>{message.from_user_id}</div>
                                         }
                                         {message.content == "" ?
-                                            <img onClick={() => handleImageClick(`http://web-chatapplication.softprodigyphp.in` + message.file)} style={{ height: "150px", cursor: 'pointer' }} src={'http://web-chatapplication.softprodigyphp.in' + message.file} />
+                                            <img onClick={() => handleImageClick(`http://${RemoveSlash(apiUrl)}` + message.file)} style={{ height: "150px", cursor: 'pointer' }} src={`http://${RemoveSlash(apiUrl)}` + message.file} />
                                             :
                                             message.content
                                         }

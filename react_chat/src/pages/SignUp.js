@@ -59,7 +59,7 @@ function SignUp() {
         if (selectedImage) {
             const form_Data = new FormData()
             form_Data.append("image", selectedImage)
-            fetch(`http://${apiUrl}UpdateUserImage/${username_input}`, {
+            await fetch(`http://${apiUrl}UpdateUserImage/${username_input}`, {
                 method: 'PUT',
                 body: form_Data,
             })
@@ -93,24 +93,6 @@ function SignUp() {
         const file = e.target.files[0];
         setSelectedImage(file);
     };
-    async function uploadDocument(fileName) {
-        const apiEndpoint = `http://${apiUrl}documentUpload/`;
-
-        const form_Data = new FormData()
-        form_Data.append("image", fileName)
-
-        await fetch(apiEndpoint, {
-            method: 'PUT',
-            body: form_Data
-
-        })
-            .then(response => response.json())
-            .then(data => {
-            })
-            .catch(error => {
-                console.error('API Error:', error);
-            });
-    }
 
     return (
         <MDBContainer fluid>
