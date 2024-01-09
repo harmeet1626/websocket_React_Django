@@ -32,7 +32,7 @@ function Login() {
                 });
                 return
             }
-            else{
+            else {
                 toast.error('Invalid creadentials!', {
                     position: 'top-right',
                     autoClose: 3000,
@@ -58,7 +58,6 @@ function Login() {
 
                             <MDBInput onInput={(e) => setUsername(e.target.value)} wrapperClass='mb-4 w-100' label='Username' id='formControlLg' type='email' size="lg" />
                             <MDBInput onInput={(e) => SetPassword(e.target.value)} wrapperClass='mb-4 w-100' label='Password' id='formControlLg' type='password' size="lg" />
-
 
                             <MDBBtn onClick={() => login_user()} size='lg'>
                                 Login

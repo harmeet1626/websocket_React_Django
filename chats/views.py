@@ -259,19 +259,31 @@ class UpdateUserImage(UpdateAPIView):
     def put(self, request, *args, **kwargs):
         username = self.kwargs.get('username')
         user_instance = User.objects.get(username=username)
-        serializer = self.get_serializer(data=request.data)
+        user_image_instance, created = User_Image.objects.get_or_create(user=user_instance)
+        
+        # Update the existing user image record
+        serializer = self.get_serializer(user_image_instance, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(user=user_instance)
+
         return Response("Image updated")
+        
+    
 
 class GetCurrentUser(APIView):
     def get(self, request, *args, **kwargs):
         # Check if the user is authenticated
-        print(request.user)
         if request.user.is_authenticated:
-            # Access the current logged-in user
             current_user = request.user
-            # Now you can use the 'current_user' object as needed
-            return Response(current_user.username)
+            userDetails = User.objects.get(username = current_user)
+            userImage = User_Image.objects.filter(user__username = userDetails).values().first()
+            
+
+            res = {
+                "username":userDetails.username,
+                "userimage":str(userImage['image']),
+                "userEmail":str(userDetails.email)
+            }         
+            return Response(res)
         else:
             return Response({"message": "User is not authenticated"})

@@ -217,6 +217,9 @@ export const ChatComponent = (props) => {
     const handleImageClick = (imageUrl) => {
         window.open(imageUrl, '_blank');
     };
+    function RemoveSlash(str) {
+        return str.slice(0, -1);
+    }
     return (
         <>
             <div className="chat" >
@@ -266,7 +269,7 @@ export const ChatComponent = (props) => {
                                 <div>
                                     <div style={{ padding: "5px 20px", wordBreak: "break-word", backgroundColor: message.from_user.username === user.username ? "rgb(133 196 235)" : "#f3f3f3" }} className={message.from_user.username === user.username ? "message other-message float-right" : "message my-message"}>
                                         {message.content == "" ?
-                                            <img onClick={() => handleImageClick('http://web-chatapplication.softprodigyphp.in' + message.file)} style={{ height: "150px", cursor: "pointer" }} src={'http://web-chatapplication.softprodigyphp.in/' + message.file} />
+                                            <img onClick={() => handleImageClick(`http://${RemoveSlash(apiUrl)}` + message.file)} style={{ height: "150px", cursor: "pointer" }} src={`http://${apiUrl}/` + message.file} />
                                             :
                                             message.content}
 

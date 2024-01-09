@@ -62,7 +62,7 @@ export const Conversation = () => {
             var result = splitString.slice(2).join('/');
             setActiveChat(result)
         } else {
-            console.log("Not enough slashes in the string.");
+            return
         }
 
     }, [location])
@@ -226,7 +226,7 @@ export const Conversation = () => {
                     </Modal.Footer>
                 </Modal>
                 <div className="card chat-app" style={{ backgroundColor: "whitesmoke", display: "flex" }}>
-                    <div id="plist" className="people-list" style={{ overflowY: 'auto', maxHeight: '100vh' }} >
+                    <div id="plist" className="people-list" style={{ overflowY: 'auto', maxHeight: '85vh' }} >
                         <div >
                             <div className="input-group" style={{ flexWrap: 'inherit' }}>
                                 <input style={inputStyle} placeholder='search user' value={searchTerm}
