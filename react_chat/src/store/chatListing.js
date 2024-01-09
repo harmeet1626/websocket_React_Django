@@ -19,7 +19,7 @@ const groupListing = createSlice({
     name: 'groupList',
     initialState: {
         data: [],
-        status: 'idle', 
+        status: 'idle',
         error: null,
     },
     reducers: {},

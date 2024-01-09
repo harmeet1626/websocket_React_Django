@@ -62,10 +62,6 @@ class Message(models.Model):
         super().save(*args, **kwargs)
     
 
-    # def __str__(self):
-    #     return f"From {self.from_user.username} to {self.to_user.username}: {self.content} [{self.timestamp}]"
-
-
 class Media(models.Model):    
     file = models.FileField(upload_to='static/file', null=True, blank=True)
 

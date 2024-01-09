@@ -10,10 +10,7 @@ import {
     MDBCardBody,
     MDBCardImage,
     MDBInput,
-    MDBIcon,
-    MDBCheckbox
-}
-    from 'mdb-react-ui-kit';
+} from 'mdb-react-ui-kit';
 import { useNavigate } from 'react-router-dom';
 
 function SignUp() {
@@ -102,20 +99,15 @@ function SignUp() {
                         <MDBCol md='10' lg='6' className='order-2 order-lg-1 d-flex flex-column align-items-center'>
 
                             <p classNAme="text-center h1 fw-bold mb-5 mx-1 mx-md-4 mt-4">Sign up</p>
-
                             <div className="d-flex flex-row align-items-center mb-4 ">
-
-                                {/* <MDBIcon fas icon="user me-3" size='lg' /> */}
                                 <MDBInput value={username_input} onChange={(e) => setUsername_input(e.target.value)} label='Username' id='form1' type='text' className='w-100' />
                             </div>
 
                             <div className="d-flex flex-row align-items-center mb-4">
-                                {/* <MDBIcon fas icon="envelope me-3" size='lg' /> */}
                                 <MDBInput value={email_input} onChange={(e) => setEmail_input(e.target.value)} label='Your Email' id='form2' type='email' />
                             </div>
 
                             <div className="d-flex flex-row align-items-center mb-4">
-                                {/* <MDBIcon fas icon="lock me-3" size='lg' /> */}
                                 <MDBInput value={password_input} onChange={(e) => setPassword_input(e.target.value)} label='Password' id='form3' type='password' />
                             </div>
                             <div className="d-flex flex-row align-items-center mb-4 ">
@@ -125,15 +117,7 @@ function SignUp() {
                                     <input type="file" accept="image/*" onChange={handleImageChange} />
                                 </div>
                             </div>
-
-                            {/* <div className="d-flex flex-row align-items-center mb-4">
-                                <MDBIcon fas icon="key me-3" size='lg' />
-                                <MDBInput label='Repeat your password' id='form4' type='password' />
-                            </div> */}
-
-
                             <MDBBtn onClick={() => createUser()} className='mb-4' size='lg'>Register</MDBBtn>
-
                         </MDBCol>
 
                         <MDBCol md='10' lg='6' className='order-1 order-lg-2 d-flex align-items-center'>
