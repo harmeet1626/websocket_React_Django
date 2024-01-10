@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react"
-import { useParams } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import AuthService from '../auth/AuthService';
 import InputEmoji from 'react-input-emoji'
 import useWebSocket, { ReadyState } from "react-use-websocket";
@@ -16,9 +16,11 @@ import { BiSolidAddToQueue } from "react-icons/bi";
 import Button from "react-bootstrap/esm/Button";
 import { useDispatch } from "react-redux";
 import { fetchGroups } from "../store/chatListing";
+import { toast } from "react-toastify";
 
 export const GroupChat = () => {
     const params = useParams()
+    const navigate = useNavigate()
     const apiUrl = process.env.REACT_APP_API_BASE_URL;
     const [messageHistory, setMessageHistory] = useState([]);
     const [message, setMessage] = useState("");
@@ -254,7 +256,7 @@ export const GroupChat = () => {
         if (selectedImage) {
             const form_Data = new FormData()
             form_Data.append("image", selectedImage)
-            fetch(`http://${apiUrl}UpdateGroupImage/${params.groupName}`, {
+            await fetch(`http://${apiUrl}UpdateGroupImage/${params.groupName}`, {
                 method: 'PUT',
                 body: form_Data,
             })
@@ -271,6 +273,35 @@ export const GroupChat = () => {
     function RemoveSlash(str) {
         return str.slice(0, -1);
     }
+    const handleDeleteGroup = async () => {
+        try {
+            const response = await fetch(`http://${apiUrl}DeleteGroup/${params.groupName}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Add any other headers if needed, such as authentication headers
+                },
+            });
+
+            if (response.ok) {
+                dispatch(fetchGroups(`Token ${user?.token}`))
+                navigate('/')
+                toast.success('Group Deleted.', {
+                    position: 'top-right',
+                    autoClose: 3000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                });
+                console.log('Group deleted successfully');
+            } else {
+                console.error('Failed to delete group');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    };
     return (
         <>
             <div className="chat" >
@@ -290,7 +321,7 @@ export const GroupChat = () => {
                                     <Accordion.Body>
                                         <ListGroup >
                                             {participants.map((u) => (
-                                                <div >
+                                                <div key={u.username}>
                                                     <div style={{ textTransform: 'uppercase', padding: '10px' }}
                                                         key={u.username} className="d-flex justify-content-between align-items-center">
                                                         <span style={{ display: 'flex' }}>
@@ -332,7 +363,7 @@ export const GroupChat = () => {
                                                                             <Dropdown.Item onClick={() => UpdateGroupAdmin(u.username)}>
                                                                                 <div className="d-flex align-items-center">
                                                                                     <p style={{ margin: '0' }} >Make Group Admin</p>
-                                                                                    <span class="material-symbols-outlined">
+                                                                                    <span className="material-symbols-outlined">
                                                                                         admin_panel_settings
                                                                                     </span>
                                                                                 </div>
@@ -533,6 +564,9 @@ export const GroupChat = () => {
                                 <div style={{ padding: '10px' }}>
                                     <input type="file" accept="image/*" onChange={handleImageChange} />
                                     <Button onClick={handleImageUpload}>Update Image</Button>
+                                    <div style={{ padding: '10px' }}>
+                                        <Button variant="danger" onClick={() => handleDeleteGroup()}>Delete Group</Button>
+                                    </div>
                                 </div>
                             </Tab>
                             : ""}
@@ -548,7 +582,7 @@ export const GroupChat = () => {
                                 &nbsp;&nbsp;
                                 <h6 style={{ padding: "5px", textTransform: 'uppercase' }} className="m-b-0">{params.groupName}</h6>
                             </div>
-                            <span style={{ padding: "3px" }} class="material-symbols-outlined">
+                            <span style={{ padding: "3px" }} className="material-symbols-outlined">
                                 list
                             </span>
                         </div>
@@ -617,13 +651,13 @@ export const GroupChat = () => {
                         }}
                             onClick={() => {
                                 fileInputRef.current.click();
-                            }} class="material-symbols-outlined">
+                            }} className="material-symbols-outlined">
                             attachment
                         </span>
                     </div>
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
                         <span style={{ marginTop: '10px', cursor: 'pointer', padding: "5px" }}
-                            onClick={() => { handleSubmit() }} class="material-symbols-outlined">
+                            onClick={() => { handleSubmit() }} className="material-symbols-outlined">
                             send
                         </span>
                     </div>

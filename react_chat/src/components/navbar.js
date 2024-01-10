@@ -67,7 +67,7 @@ export default function Navbar() {
                 .then(data => {
                     setSelectedImage(null)
                     getUserApi()
-                    toast.success('You have signed up successfully!', {
+                    toast.success('Profile picture Updated.', {
                         position: 'top-right',
                         autoClose: 3000,
                         hideProgressBar: false,
@@ -101,7 +101,7 @@ export default function Navbar() {
                     <div style={{ position: 'relative', padding: '10px', height: 'fit-content' }}>
                         <img src={`http://${apiUrl}` + userdetails?.userimage} style={{ borderRadius: "40px", height: '90px', width: '90px' }} />
                         <div style={{ position: 'absolute', bottom: 0, right: 0 }}>
-                            <span class="material-symbols-outlined" style={{ cursor: 'pointer' }} onClick={() => {
+                            <span className="material-symbols-outlined" style={{ cursor: 'pointer' }} onClick={() => {
                                 fileInputRef.current.click();
                             }}>
                                 edit
@@ -139,7 +139,7 @@ export default function Navbar() {
             </Modal>
             <MDBNavbar expand='lg' style={{ backgroundColor: "rgb(41 155 211)" }}>
                 <MDBContainer fluid>
-                    <MDBNavbarBrand href='#'><span style={{ padding: "2px" }} class="material-symbols-outlined">
+                    <MDBNavbarBrand href='#'><span style={{ padding: "2px" }} className="material-symbols-outlined">
                         forum
                     </span> Chat Application</MDBNavbarBrand>
                     <MDBNavbarToggler

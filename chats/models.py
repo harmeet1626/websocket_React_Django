@@ -71,7 +71,7 @@ class Media(models.Model):
 
 
 class Groups(models.Model):
-    name = models.CharField(max_length=500)
+    name = models.TextField()
     Created_by = models.CharField(max_length=500,null=True, blank=True)
     Created_on = models.DateField(max_length=500, null=True, blank=True)
     Admin = models.ForeignKey(User, on_delete = models.CASCADE, related_name="Admin", null=True, blank=True)

@@ -1,5 +1,5 @@
 from django.urls import path
-from chats.views import CreateUserView,UploadDocument, User_group, CreateGroup, GetGroupParticipants,RemoveUserFromGroup,AddParticipantInGroup, GetSingleUser, UpdatedGroupAdmin, UpdateGroupImage,UpdateUserImage,GetCurrentUser
+from chats.views import CreateUserView,UploadDocument, User_group, CreateGroup, GetGroupParticipants,RemoveUserFromGroup,AddParticipantInGroup, GetSingleUser, UpdatedGroupAdmin, UpdateGroupImage,UpdateUserImage,GetCurrentUser, DeleteGroup
 
 
 urlpatterns =[
@@ -14,5 +14,6 @@ urlpatterns =[
     path('UpdatedGroupAdmin/',UpdatedGroupAdmin.as_view(), name='UpdatedGroupAdmin'),
     path('UpdateGroupImage/<str:group_name>',UpdateGroupImage.as_view(), name='UpdateGroupImage'),
     path('UpdateUserImage/<str:username>',UpdateUserImage.as_view(), name='UpdateGroupImage'),
-    path('GetCurrentUser/',GetCurrentUser.as_view(), name='GetCurrentUser')
+    path('GetCurrentUser/',GetCurrentUser.as_view(), name='GetCurrentUser'),
+    path('DeleteGroup/<group_name>',DeleteGroup.as_view(), name='DeleteGroup')
 ]

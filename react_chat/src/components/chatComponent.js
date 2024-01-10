@@ -292,13 +292,13 @@ export const ChatComponent = (props) => {
                         }}
                             onClick={() => {
                                 fileInputRef.current.click();
-                            }} class="material-symbols-outlined">
+                            }} className="material-symbols-outlined">
                             attachment
                         </span>
                     </div>
                     <div className="input-group-prepend" style={{ padding: '2px' }}>
                         <span style={{ marginTop: '10px', cursor: 'pointer', padding: "5px" }}
-                            onClick={() => { handleSubmit() }} class="material-symbols-outlined">
+                            onClick={() => { handleSubmit() }} className="material-symbols-outlined">
                             send
                         </span>
                     </div>
