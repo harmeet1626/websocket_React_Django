@@ -9,10 +9,11 @@ from django.contrib.auth.models import User
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from chats.paginators import MessagePagination
-from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
 from django.contrib.auth.hashers import make_password
 from datetime import date
 from rest_framework.views import APIView
+from rest_framework import status
 
 
 
@@ -287,3 +288,22 @@ class GetCurrentUser(APIView):
             return Response(res)
         else:
             return Response({"message": "User is not authenticated"})
+        
+
+
+
+class DeleteGroup(DestroyAPIView):
+    queryset = Groups.objects.all()
+    serializer_class = Groups_serializers
+    lookup_field = 'name'  
+
+    def destroy(self, request, *args, **kwargs):
+        group_name = self.kwargs.get('group_name')
+        if not group_name:
+            return Response({'error': 'Group name is required in the parameters.'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            instance = self.get_queryset().get(name=group_name)
+        except Groups.DoesNotExist:
+            return Response({'error': 'Group not found.'}, status=status.HTTP_404_NOT_FOUND)
+        self.perform_destroy(instance)
+        return Response({'success': 'Group deleted successfully.'}, status=status.HTTP_204_NO_CONTENT)

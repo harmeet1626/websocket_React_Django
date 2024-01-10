@@ -129,6 +129,7 @@ export const Conversation = () => {
     };
     // Filter array1
     const filteredGroup = groupList.filter((item) =>
+
         item.groupName.toLowerCase().includes(searchTerm.toLowerCase())
     );
     // Filter array2
@@ -143,7 +144,7 @@ export const Conversation = () => {
         if (selectedImage) {
             const form_Data = new FormData()
             form_Data.append("image", selectedImage)
-            fetch(`http://${apiUrl}UpdateGroupImage/${groupNameInput}`, {
+            await fetch(`http://${apiUrl}UpdateGroupImage/${groupNameInput}`, {
                 method: 'PUT',
                 body: form_Data,
             })
@@ -174,15 +175,22 @@ export const Conversation = () => {
                         <h6>Choose Group Icon</h6>
                         <input type="file" accept="image/*" onChange={handleImageChange} />
                     </div>
-                    <InputGroup size="sm" className="mb-3">
-                        <InputEmoji
+                    <InputGroup size="sm" className="mb-3" style={{ width: '80%', padding: '5px' }}>
+                        <input
+                            // cleanOnEnter
+                            onChange={(e) => setGroupNameInput(e.target.value)}
+                            type="text"
+                            className="form-control"
+                            placeholder="Enter Group Name"
+                            style={{ backgroundColor: 'white', borderRadius: '20px' }} />
+                        {/* <InputEmoji
                             cleanOnEnter
                             onChange={setGroupNameInput}
                             type="text"
                             className="form-control"
                             placeholder="Enter Group Name"
                             style={{ backgroundColor: 'white' }}
-                        />
+                        /> */}
                     </InputGroup>
                     <Form style={{ padding: "10px" }}>
                         <h6>Participants</h6>
@@ -216,17 +224,17 @@ export const Conversation = () => {
                             <ul className="list-unstyled chat-list mt-2 mb-0" >
                                 <div style={{ display: "flex", marginTop: "3vh" }}>
                                     <p>Groups</p>
-                                    <span style={{ paddingLeft: "5px" }} class="material-symbols-outlined">
+                                    <span style={{ paddingLeft: "5px" }} className="material-symbols-outlined">
                                         groups
                                     </span>
-                                    <span onClick={handleShow} style={{ marginLeft: 'auto', cursor: 'pointer' }} class="material-symbols-outlined">
+                                    <span onClick={handleShow} style={{ marginLeft: 'auto', cursor: 'pointer' }} className="material-symbols-outlined">
                                         add_box
                                     </span>
                                 </div>
                                 {filteredGroup
                                     .map((group, index) => (
-                                        <Link to={`groups/${group.groupName}`} onClick={() => { setActiveChat(group.groupName) }}>
-                                            <div key={index}>
+                                        <Link key={index} to={`groups/${group.groupName}`} onClick={() => { setActiveChat(group.groupName) }}>
+                                            <div >
                                                 <li className="clearfix" style={{ borderBottom: "1px solid #ddd", borderRadius: "40px", backgroundColor: activeChat == group.groupName ? "rgb(225 225 225)" : null }}>
                                                     <div className="about" style={{ display: "flex" }}>
                                                         <img style={{ height: '40px', width: '40px' }} src={`http://${apiUrl}` + group.groupImage} />
@@ -239,7 +247,7 @@ export const Conversation = () => {
                                     ))}
                                 <div style={{ display: "flex" }}>
                                     <p style={{ margin: 'revert' }}>Direct Mssages</p>
-                                    <span style={{ paddingLeft: '5px', paddingTop: "15px" }} class="material-symbols-outlined">
+                                    <span style={{ paddingLeft: '5px', paddingTop: "15px" }} className="material-symbols-outlined">
                                         group
                                     </span>
                                 </div>
@@ -247,8 +255,8 @@ export const Conversation = () => {
                                     filteredData
                                         .filter((u) => u.username !== user?.username)
                                         .map((user, index) => (
-                                            <Link to={`user/${createConversationName(user.username)}`} onClick={() => { setActiveChat(user.username) }}>
-                                                <div key={index}>
+                                            <Link key={index} to={`user/${createConversationName(user.username)}`} onClick={() => { setActiveChat(user.username) }}>
+                                                <div>
                                                     <li className="clearfix" style={{ borderBottom: "1px solid #ddd", borderRadius: "40px", backgroundColor: activeChat == createConversationName(user.username) ? "rgb(225 225 225)" : null }}>
                                                         <div className="about" style={{ display: "flex" }}>
                                                             <img style={{ height: '40px', width: "40px" }} src={`http://${apiUrl}` + user.user_picture} />
